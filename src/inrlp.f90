@@ -57,7 +57,7 @@
       phase_comp(25,1)=2;phase_comp(25,2)=1     !air/water
       phase_comp(26,1)=1;phase_comp(26,2)=6;phase_comp(26,3)=4    !water/co2_liquid/co2_gas
       phase_comp(28,1)=2;phase_comp(28,2)=5  !water/vapor
-  	  nrlp_phases=0   ;it=0 ;k2=0 ! initialize table and rlp indices
+  	   nrlp_phases=0   ;it=0 ;k2=0 ! initialize table and rlp indices
       maxrp = 30
       maxcp = 30
       msg = 0
@@ -170,18 +170,18 @@
             cycle
 !     now we are inside the group, and the choices are rlp, table, or cap   
 !*****************TABLE ***********************************************      
-         case ('table', 'TABLE')  ! expecting 'table table_index phase_couple'
+         case ('table', 'TABLE')  ! expecting 'table  table_index phase_couple'
             j=j+1   ! always increment rlp number
             k2=k2+1  ! always increment cap number
             if (nwds .lt. 2) write(ierr, 60) 1, cmsg(2), rlp_group(i)  ! expect at least phase_couple
-			nparams=4            
+			         nparams=4            
             tblnum = imsg(2) ! first param is table index  ; not sure this is used    
             if(nwds==6) then   ! older style input; ignore all parameters except last (phase couple)
-            couple=ic(cmsg(6), ictype)
+             couple=ic(cmsg(6), ictype)
 ! gaz debug 120317            
 !            couple = 25
-			else
-            couple=ic(cmsg(2), ictype)  ! couple will be >20; ictype will include each phase            
+			         else
+             couple=ic(cmsg(2), ictype)  ! couple will be >20; ictype will include each phase            
             endif
 !     increment table index            
             it = it + 1
@@ -218,12 +218,14 @@
                table_unit = open_file(table_file,'old')
 !     Read past any header lines in the table (header lines should start with a character)
                do 
-                  read (table_unit, '(a80)') chdum
+                  read (table_unit,'(a)') chdum(1:40)
                   call parse_string2(chdum,imsg,msg,xmsg,cmsg,nwds)
                   if (msg(1) .ne. 3) then
                      backspace (table_unit)
                      exit
                   end if
+100             continue
+!                write(*,'(a)') chdum(1:40)
                end do
             else
 !     Data is found on the following lines
@@ -245,7 +247,6 @@
             cmsg(2) = 'tabular'
 !     End of case 'tabular'
          case ('rlp', 'RLP')
-!         write(*,*) 'blah 228 ',cmsg(3)
          if(cmsg(3).ne.'same') then
 !  		 write(*,*) 'not same'
 !     **************** REL PERMS ******************************
@@ -589,6 +590,5 @@
 	end do    
 	return
 	end
-	
-	
-	
+
+                                                                                                                      

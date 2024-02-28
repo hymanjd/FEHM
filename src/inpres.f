@@ -289,8 +289,13 @@ c gaz 120512 don't change T for co2-h20 problems
 c gas only
                to(i) =  tmp(i)
                s (i) =  0.0
-            end if
-         end if
+           else if(ieos(i).eq.0) then
+c gaz 091023
+c heat conduction only 
+               to(i) =  tmp(i)
+               s (i) =  1.0          
+           end if
+         endif
       end do
 
       deallocate(tmp)
