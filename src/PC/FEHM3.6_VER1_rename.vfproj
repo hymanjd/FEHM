@@ -400,7 +400,7 @@
 		<File RelativePath=".\SRC_MASTER\interp8.f"/>
 		<File RelativePath=".\SRC_MASTER\interp_bilin.f"/>
 		<File RelativePath=".\SRC_MASTER\interpolate.f90"/>
-		<File RelativePath=".\SRC_MASTER\interpolate_2.f90"/>
+		<File RelativePath=".\SRC_MASTER\interpolate_2a.f90"/>
 		<File RelativePath=".\SRC_MASTER\interpolate_2b.f90"/>
 		<File RelativePath=".\SRC_MASTER\interpolate_2c.f90"/>
 		<File RelativePath=".\SRC_MASTER\interpolate_q2n_3r.f"/>

@@ -81,7 +81,7 @@ mv innode_2c.f innode.f
 mv inpres_2b.f inpres.f
 mv input_2g.f input.f
 mv inrlp_2b.f90 inrlp.f90
-mv interpolate_2a.f90 interpolate_2.f90
+# keep interpolate_2a.f90 
 mv model_setup_2d.f model_setup.f
 mv normal_dof_2b.f normal_dof.f
 mv nr_stop_ctr_2f.f nr_stop_ctr.f
