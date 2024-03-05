@@ -140,7 +140,7 @@ c gaz 071522  only one material file time = 0.0
 12     format(a18) 
 112     format(a23)        
        inquire(file = cont_log_file, exist = exists)
-        if(exists.eq..true.) then
+        if(exists.eqv..true.) then
           jj = len_trim(cont_log_file)
           tec_file_name(j)(1:jj) = cont_log_file(1:jj)
         else
@@ -422,7 +422,7 @@ c write out scalar name
       write(10,192) 
       write(10,'(1p,10(1x,i14))') (i, i = 1, neq)      
 c gaz 021322 added delete for tec files      
-      close(9, dispose = 'delete')
+      close(9)
       close(10)
       else
 c j_vtk gt 1 
@@ -512,7 +512,7 @@ c write out scalar name
       write(10,191) 'Node_Num'
       write(10,192) 
       write(10,'(1p,10(1x,g14.6))') (i, i = 1, neq)
-      close(9, dispose = 'delete')      
+      close(9)      
       close(10)
 c end of loop for vtk output files  
       endif

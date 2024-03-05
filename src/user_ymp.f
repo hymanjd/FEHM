@@ -1978,7 +1978,7 @@ c
         allocate (sk_save(nblk))
         sk_save = 0.0d0
         area_total = 0.0
-        if(approx.eq..false.) then
+        if(approx.eqv..false.) then
 c area obtained from outside zone list and outside_vor.area            
         write(ierr,*) '>>>>> top outside zone >>>>> ',izone_num2
         do j = 1, idummy

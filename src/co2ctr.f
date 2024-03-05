@@ -1132,8 +1132,10 @@ cDEC$ FIXEDFORMLINESIZE:132
       if(iflg.eq.0) then
 c allocate memory            
 c initialize and allocate memory   
-       call fluid_props_control(0, 0, 0, fluid(1), 'all      ', '         ')
-       call fluid_props_control(0, 0, 0, fluid(2), 'all      ', '         ')  
+       call fluid_props_control(0, 0, 0, fluid(1), 'all      ', 
+     &      '         ')
+       call fluid_props_control(0, 0, 0, fluid(2), 'all      ',
+     &      '         ')
       else if(iflg.eq.1.or.iflg.eq.-1) then
 c calculate initial phase states   
 c gaz 072522 check for gas phase conditions step 1
@@ -1265,8 +1267,10 @@ c
         sl = s(mi)
 c gaz set s(mi) = 0.5 to get liq and vap props  
           s(mi) = 0.5
-          call fluid_props_control(1, mi, mi,fluid(1), 'all      ', '         ') 
-          call fluid_props_control(1, mi, mi,fluid(2), 'all      ', '         ')
+          call fluid_props_control(1, mi, mi,fluid(1), 'all      ', 
+     &         '         ') 
+          call fluid_props_control(1, mi, mi,fluid(2), 'all      ',
+     &         '         ') 
           rol = den_h2o(mi,1)
           rov	= den_h2o(mi,4)          
           roc = den_ngas(mi,1) 
@@ -1276,7 +1280,8 @@ c gaz set s(mi) = 0.5 to get liq and vap props
           s(mi) =sl 
         do inr0 = 1, max_inr0
 c        
-          resid_mass = xnl*rol*sl + xnv*ros*(1-sl) - zl_ngas*(rol*sl+ros*(1-sl))            
+          resid_mass = xnl*rol*sl + xnv*ros*(1-sl) - 
+     &                 zl_ngas*(rol*sl+ros*(1-sl)) 
           dresid_sl = xnl*rol - xnv*ros - zl_ngas*(rol-ros)
           sl = sl - resid_mass/dresid_sl
           if(abs(resid_mass).le.tol_mass_phase) then 
@@ -1321,19 +1326,22 @@ c did not converge in max_inr iterations
           node_intv(intv_cnt) = mi
          elseif(mod(intv_cnt,intv).eq.0) then
           node_intv(intv_cnt) = mi     
-          write(ierr,502)(node_intv(i),ieos_prev(node_intv(i)),ieos(node_intv(i)),i = 1,intv_cnt)
+          write(ierr,502)(node_intv(i),ieos_prev(node_intv(i)),
+     &          ieos(node_intv(i)),i = 1,intv_cnt)
           intv_cnt = 0  
          endif
         endif
         enddo
         if(intv_cnt.ne.0) then
-          write(ierr,502)(node_intv(i),ieos_prev(node_intv(i)),ieos(node_intv(i)),i = 1,intv_cnt)
+          write(ierr,502)(node_intv(i),ieos_prev(node_intv(i)),
+     &          ieos(node_intv(i)),i = 1,intv_cnt)
           intv_cnt = 0 
         endif
-501     format('time (days)',1x,g12.5,' tstep',1x,i6,' iter',1x,i4,' phase chng',1x,i6)   
+501     format('time (days)',1x,g12.5,' tstep',1x,i6,' iter',1x,i4,
+     &  ' phase chng',1x,i6)   
 502     format(1x,10(1x,'node =',i7,',','(',i1,',',i1,')'))   
-        if(iflg.eq.-1.and.phase_nr(1).eq..false..and.phase_nr(2).eq..false.
-     &  .and.phase_nr(3).eq..false.) then       
+        if(iflg.eq.-1.and.phase_nr(1).eqv..false..and.
+     &     phase_nr(2).eqv..false. .and.phase_nr(3).eqv..false.) then 
 c something went wrong in. phase check    
          if(iptty.ne.0) write(iptty,*) 'phase check error - stopping'
          if(iout.ne.0) write(iout,*) 'phase check error - stopping'
@@ -1609,7 +1617,10 @@ c
       use comfi
       implicit none
       integer iflg, ieosd, ij
-      real*8 deriv(4,4)
+
+c tammarch2024 change to match earlier declaration
+c     real*8 deriv(4,4)
+      real*8 deriv(3,3)
       real*8 xnv,xnl,rov,rol,dxnlp,dxnvp
       real*8 dsldz, denom, ddenomp, ddenomt 
       real*8 drolp, drovp, drolt, drovt, dsldp, dsldpc
@@ -1677,7 +1688,8 @@ c      use comdi,only : ps, denh, deneh, ieos, t, phi, s
       integer iflg,i,id,id1,i1,i2,nsizea1,nsizea,neqp1,ndummy   
       real*8 dtin, ztol, energy_norm, frac_ngas, sx1d
       real*8 delmax(3), tol_eq1, tol_eq2, tol_eq3
-      real*8 fdum_phase_calc, fdum_phase_prev, tol_phase_calc, fdum_raw(3)
+      real*8 fdum_phase_calc, fdum_phase_prev, tol_phase_calc 
+      real*8 fdum_raw(3)
       real*8 dtot_orig, ts_fac
       real*8 strd_smpl
       real*8 phi_low,phi_high,t_low,t_high,pci_low,pci_high
