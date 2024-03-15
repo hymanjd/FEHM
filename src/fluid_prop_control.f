@@ -20,7 +20,10 @@ c phase =  phase, ngas always is 'gas'
           implicit none
              
           integer iflg, istart, iend, ii
-          character*9 prop, phase, fluid_type
+c tammar2024 compiler error for parameters with empty strings
+c         character*9 prop, phase, fluid_type
+          character (*) prop, phase, fluid_type
+
 c gaz 052522 describe  subroutine pass-through variables
 c iflg : flag passed to fluid prop routines          
           if(fluid_type(1:3).eq.'h2o') then
@@ -59,7 +62,10 @@ c
           implicit none
              
           integer iflg, istart, iend, ii, n_allocate
-          character*9 prop, phase
+
+c tammar2024 compiler error for parameters with empty strings
+c         character*9 prop, phase
+          character (*) prop, phase
 
           integer ndummy,iieosl,mid,mi,ieosd,iieosd,kq
 
@@ -759,7 +765,10 @@ c
           implicit none
              
           integer iflg, istart, iend, ii, n_allocate
-          character*9 prop, phase
+
+c tammar2024 compiler error for parameters with empty strings
+c         character*9 prop, phase
+          character (*) prop, phase
 
           integer mid,mi,ieosd,kq
 c gaz 102621
@@ -1167,7 +1176,10 @@ c
              
           integer iflg, istart, iend, ii, n_allocate
           integer ipv_tol
-          character*9 prop, phase
+
+c tammar2024 compiler error for parameters with empty strings
+c         character*9 prop, phase
+          character (*) prop, phase
 
           integer ndummy,iieosl,mid,mi,ieosd,iieosd,kq
           real*8 dpsatt, dpct, psatl_100, dpsats
@@ -1276,7 +1288,10 @@ c
              
           integer iflg, istart, iend, ii, n_allocate
           integer ipv_tol
-          character*9 prop, phase
+
+c tammar2024 compiler error for parameters with empty strings
+c         character*9 prop, phase
+          character (*) prop, phase
 
           integer ndummy,iieosl,mid,mi,ieosd,iieosd,kq
           real*8 dpsatt, dpct, psatl_100, dpsats
@@ -1366,7 +1381,9 @@ c
           implicit none
              
           integer iflg, istart, iend, ii, n_allocate
-          character*9 prop, phase
+c tammar2024 compiler error for parameters with empty strings
+c         character*9 prop, phase
+          character (*) prop, phase
 
           integer mid,mi,ieosd,kq
 
@@ -1626,7 +1643,8 @@ c
 c subroutine to evaluate air properties using tables
 c gaz 070921 initial coding
 c air property calls assume water property calls are made earlier
-c call optimization probably workd only for nodal sequence (all water and air props for m=1,2,..)  
+c call optimization probably workd only for nodal sequence 
+c      (all water and air props for m=1,2,..)  
 c note that the derivatives wrt t and f(t,p) dfdt, dfdp (value_a(1:3) wheeas the storage for
 c den_ngas(:,:) is f(t,p) dfdp, dfdt   
 c      
@@ -1642,7 +1660,9 @@ c
           implicit none
              
           integer iflg, istart, iend, ii, n_allocate
-          character*9 prop, phase
+c tammar2024 compiler error for parameters with empty strings
+c         character*9 prop, phase
+          character (*) prop, phase
 
           integer mid,mi,ieosd,kq
 
@@ -1907,9 +1927,10 @@ c subroutine to evaluate co2 properties using tables
 c gaz 081421  initial coding
 c co2 uses same structure and variables as air
 c air property calls assume water property calls are made earlier
-c call optimization probably workd only for nodal sequence (all water and air props for m=1,2,..)  
-c note that the derivatives wrt t and f(t,p) dfdt, dfdp (value_a(1:3) whereas the storage for
-c den_ngas(:,:) is f(t,p) dfdp, dfdt   
+c call optimization probably workd only for nodal sequence 
+c      (all water and air props for m=1,2,..)  
+c note that the derivatives wrt t and f(t,p) dfdt, dfdp (value_a(1:3) 
+c whereas the storage for den_ngas(:,:) is f(t,p) dfdp, dfdt   
 c      
           use com_prop_data
           use comai, only: ico2, ierr, igrav, grav, iout, p_tol, t_tol,
@@ -1923,7 +1944,9 @@ c
           implicit none
              
           integer iflg, istart, iend, ii, n_allocate
-          character*9 prop, phase
+c tammar2024 compiler error for parameters with empty strings
+c         character*9 prop, phase
+          character (*) prop, phase
 
           integer mid,mi,ieosd,kq
 

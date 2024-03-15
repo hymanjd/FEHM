@@ -570,6 +570,9 @@ c following variables are associated with the drift flux nodel
       real*8 mdrifti,dmdriftpi,dmdriftei,mdrift_part
       real*8 mdriftkb,dmdriftpkb,dmdriftekb
       real*8 area_face,dmdrpkb,dmdrekb,dmdrpi,dmdrei
+
+c begin
+
 c changed by avw -- entered here by seh
       neqp1=neq+1
       if(i.gt.neq) then
@@ -1003,6 +1006,15 @@ c
       elseif(icnl.ne.0) then
          radi=cord(iz,3)
          do 69 jm=1,iq
+
+c tam debug
+            if (size(thx) .lt. kb) then
+              print *, "geneq2 called with parameter i: ",i
+              print *, "ERROR: index for thx is too large."
+              print *, "index kb for thx:  ",kb
+              print *, "size of thx: ",size(thx)
+            endif
+
             kb=it8(jm)
             kz=kb-icd
             iwd=it10(jm)

@@ -58,12 +58,19 @@
       phase_comp(26,1)=1;phase_comp(26,2)=6;phase_comp(26,3)=4    !water/co2_liquid/co2_gas
       phase_comp(28,1)=2;phase_comp(28,2)=5  !water/vapor
   	   nrlp_phases=0   ;it=0 ;k2=0 ! initialize table and rlp indices
+
+!     begin
+
       maxrp = 30
       maxcp = 30
+
+!     initialize parse_string2 parameters
+      nwds = 0
       msg = 0
       imsg = 0
       xmsg = 0.
       cmsg = ''
+
       macro = 'rlpm'
       if (lastrun .ne. irun) then
          lastrun = irun
@@ -219,6 +226,7 @@
 !     Read past any header lines in the table (header lines should start with a character)
                do 
                   read (table_unit,'(a)') chdum(1:40)
+                  nwds = 0
                   call parse_string2(chdum,imsg,msg,xmsg,cmsg,nwds)
                   if (msg(1) .ne. 3) then
                      backspace (table_unit)
@@ -470,6 +478,8 @@
                read (inpt, '(a80)') chdum
                if (null1(chdum) .or. chdum(1:3) .eq. 'end' .or.    &
                 chdum(1:3) .eq. 'END') exit
+
+               nwds = 0
                call parse_string2(chdum,imsg,msg,xmsg,cmsg,nwds)
                
                if (cmsg(1) .eq. 'fracture') then
@@ -527,6 +537,7 @@
                k=len(trim(chdum))
                chdum(6:k+5)=trim(chdum)
                chdum(1:5)='rlp '
+               nwds = 0
                go to 25
 !            end select
          end select

@@ -514,17 +514,21 @@ c gaz 062718
       character*32 cmsg(20)
       character*30 zonesavename
 
+c begin
       sssol = 'no  '
       altc = 'fehm'
       inptorig = inpt
-c gaz 020522 enable vtk call
-      i_vtk = 0
+
+c     initialize parse_string2 parameters
+      nwds = 0
       imsg = 0
       xmsg = 0.
       cmsg = ''
+
+c gaz 020522 enable vtk call
+      i_vtk = 0
       macro = ''
       last_macro = ''
-      
       flag_heat_out = .false.      
 
       read (inptorig, '(a80)') wdd
@@ -550,7 +554,8 @@ c confirm this is the terminator for the last macro read
       end if
  798  format ( 'WARNING : input title : ', 
      &     a4, ' unlabeled macro terminator',/)
-         
+        
+      nwds = 0 
       call parse_string2(wdd1,imsg,msg,xmsg,cmsg,nwds)
 
       if (nwds .gt. 1) then
@@ -678,6 +683,8 @@ c zvd 12-Jul-2010 Only activate if this isn't a head problem
          if (ihead .eq. 0) then
             backspace inpt
             read(inpt,'(a80)') input_msg 
+
+            nwds = 0
             call parse_string(input_msg,imsg,msg,xmsg,cmsg,nwds)
 c            read(input_msg,*,end= 995) macro, head0, temp0, pres0, 
 c     &           sat_ich, head_id
@@ -721,6 +728,7 @@ c don't break connection between nodes with boundary conditions
 c new form cden FEHM ver 3.2
          backspace (inpt)
          read (inpt, '(a80)') input_msg
+         nwds = 0
          call parse_string(input_msg,imsg,msg,xmsg,cmsg,nwds)
          if (nwds .gt. 1) then
             cden_type = cmsg(2)
@@ -807,6 +815,7 @@ c**** contour plot information ****
      &        altc(1:3) .eq. 'sur' .or. altc(1:3) .eq. 'tec' .or.
      &        altc(1:3) .eq. 'vtk') then
             read(inpt, '(a)') input_msg
+            nwds = 0
             call parse_string(input_msg,imsg,msg,xmsg,cmsg,nwds)
             altc = cmsg(1)
             if(altc.eq.'vtk ') then
@@ -979,6 +988,7 @@ c**** read in sources and sinks - time dependent mode ****
          iboun=1
          backspace (inpt)
          read(inpt,'(a80)') input_msg
+         nwds = 0
          call parse_string(input_msg,imsg,msg,xmsg,cmsg,nwds)
          if (nwds .ge. 2) then
             if (msg(2) .eq. 3) then
@@ -1005,6 +1015,7 @@ c s kelkar 3 July 2014, for calculating heat flow vectors
 c**** calculate concentration flux ****
          backspace (inpt)
          read(inpt,'(a80)') input_msg
+         nwds = 0
          call parse_string(input_msg,imsg,msg,xmsg,cmsg,nwds)
          if (nwds .gt. 1) then
             cflx_var = .false.
@@ -1036,6 +1047,7 @@ c     Loop over each zone for determining izoncflxz array
 c**** calculate intermode fluxes ****
          backspace inpt
          read(inpt,'(a80)') input_msg 
+         nwds = 0
          call parse_string(input_msg,imsg,msg,xmsg,cmsg,nwds)
 c No additional keywords both water and air (vapor) fluxes (if 2-phase) 
 c will be output 

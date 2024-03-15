@@ -602,7 +602,16 @@ c        if(l.gt.0) then
           dclf(mi) = dxnlp
           dclef(mi) = dxnls
          else
+
+c tam     cnlf has size of 1, but mi is larger
+
           xnl_max = xnl_ngas(mi,1)
+
+          if ( mi .gt. size(cnlf) ) then
+            print *, "Warn: thrair size cnlf:", size(cnlf) 
+            print *, "Warn: thrair mi too big for cnlf:", mi
+          endif
+
           xnl = cnlf(mi)
           dxnlp =0.0d0
           dclf(mi) = 0.d0

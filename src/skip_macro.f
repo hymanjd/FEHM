@@ -34,6 +34,7 @@
 c     Find the end of input for this macro
 
          read (inunit, '(a80)', end = 100) line
+         nwds = 0
          call parse_string2(line,imsg,msg,xmsg,cmsg,nwds)
 
          if (msg(1) .eq. 3) then

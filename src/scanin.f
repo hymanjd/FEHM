@@ -348,16 +348,19 @@ C***********************************************************************
       integer idum1, idum2, ilines, i
       integer icount, tprp_num
       integer jjj, isimnum, realization_num,maxrp
+      integer idebug
       logical nulldum, found_end, intfile_ex
 c gaz 051823
       integer wdd1_len
 c gaz 061223
       integer nzone_saved, icall_sv
       real*8 rflag
-        maxrp = 30
-        if(.not.allocated (rlp_phase)) then
+
+c     begin
+      maxrp = 30
+      if(.not.allocated (rlp_phase)) then
          allocate (rlp_phase(20, maxrp),rlp_group(20))
-        endif
+      endif
 c gaz 061123
         if(.not.allocated(izonesavenum)) 
      &       allocate(izonesavenum(maxsvzone))    
@@ -474,12 +477,33 @@ c gaz 070619 variables used in newer itfc
 c gaz 052322 initialize imass_phase      
       imass_phase = 0
       ivar_mass = 0
+
+c     initialize parse_string2 parameters
+      nwds = 0
+      msg = 0
+      imsg = 0
+      xmsg = 0.
+      cmsg = ''
+
  10   continue
       filename = ''
       read (inpt, '(a80)', END = 50) dumstring
       if (dumstring(1:1) .eq. '#') go to 10
       read (dumstring, '(a4)') macro
+
+c tam error  parse_string2 receiving large value for dumstring and nwds 
+c nwds issue fixed with initialization
+c dumstring issue not happening with the error check in place
+      nwds = 0
+      idebug = 1
+      if (idebug .gt. 0) then
+        if (len(dumstring) .gt. 80) then
+          print *,"ERROR: dumstring len too long: ",len(dumstring)
+          print *,dumstring
+        endif
+      endif
       call parse_string2(dumstring,imsg,msg,xmsg,cmsg,nwds)
+
       if (nwds .gt. 1) then
 c Check for "OFF" keyword for skipping macro
          found_end = .false.
@@ -969,8 +993,17 @@ c     need to know if a table with water props is read
             iwater_table = 1   
 c gaz 051823
             wdd1_len = len_trim(wdd1(10:80))
+
+c tam debug
+            print*,"wdd1 for trim 10:80: "
+            print*,"wdd1_len=len_trim: ", wdd1_len 
+
             table_name = wdd1(10:wdd1_len+10)
+
+            print*,"wdd1(10:wdd1_len+10): ", table_name 
+
 c gaz 041621 write err mesg if specified table does nor exist  
+
             intfile_ex = .false.      
             inquire(file=table_name, exist=intfile_ex)
             if(intfile_ex)  then
@@ -1772,6 +1805,7 @@ c find max_probdivs
                backspace locunitnum
             end if
             read(locunitnum,'(a80)') dummy_line
+            nwds = 0
             call parse_string(dummy_line,imsg,msg,xmsg,cmsg,nwds)
             tprp_num = imsg(1)
 ! Use multiple simulation number - irun for GoldSim or msim run
@@ -1990,6 +2024,7 @@ c find max_probdivs
                backspace locunitnum
             end if
             read(locunitnum,'(a80)') dummy_line
+            nwds = 0
             call parse_string(dummy_line,imsg,msg,xmsg,cmsg,nwds)
             tprp_num = imsg(1)
 ! Use multiple simulation number - irun for GoldSim or msim run
@@ -2348,6 +2383,7 @@ c Jan 27, 05 S kelkar read past "spring" node list
 ! The first non-character line read should contain courant factor, etc.
                if (itensor .eq. -999) then
                   done = .false.
+                  nwds = 0
                   call parse_string(dummy_line, imsg, msg, xmsg, cmsg,
      &                 nwds)
                   if(nwds.ge.3) then
@@ -2370,6 +2406,7 @@ c Jan 27, 05 S kelkar read past "spring" node list
 c...................................................................
  
          read (locunitnum, '(a80)') dumstring
+         nwds = 0
          call parse_string(dumstring, imsg, msg, xmsg, cmsg, nwds)
          if (msg(2).eq.1) then
             ist=imsg(2)

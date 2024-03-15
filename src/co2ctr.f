@@ -427,7 +427,15 @@ c applying tol_p to mass frac calc
 c     set tbnd for pco2 change(see about line 580)
        parameter(tbnd = -1.0)
        save ngas_flag, ngas_flag2
-c     
+
+c      begin
+
+c      initialize parse_string2 parameters
+       nwds = 0
+       imsg = 0
+       xmsg = 0.
+       cmsg = ''
+
 c     return if no noncondensible present
 c     
       istflag = 0
@@ -511,6 +519,7 @@ c gaz added phase designation for humidity IC (gas,ieos(i) = 3 )
 c     Check to verify if new input is being used for group 3
             read (inpt, '(a80)') dumstring
             backspace inpt
+            nwds = 0
             call parse_string2(dumstring,imsg,msg,xmsg,cmsg,nwds)
             if (nwds .gt. 0 .and. nwds .lt. 5) then
                old_input = .true.
@@ -596,6 +605,7 @@ c     Check to verify if new input is being used for group 4
             if (.not. old_input) then
                read (inpt, '(a80)') dumstring
                backspace inpt
+               nwds = 0
                call parse_string2(dumstring,imsg,msg,xmsg,cmsg,nwds)
                if (nwds .gt. 0 .and. nwds .lt. 5) then
                   old_input = .true.
