@@ -187,10 +187,11 @@ c     read in nodal capillary type
            do i = 1, ntblines_roc
              roc_table(i,1:3) = temp_table(i,1:3)
            enddo
-          call manage_rock_tables(3,0,0,0.d0,0.d0,0.d0,0.d0,0.d0)
-        endif
-
-            
+c xhua error#6631 A non-optional actual argument must be present when invoking a procedure with an explicit interface
+c         call manage_rock_tables(3,0,0,0,0.d0,0.d0,0.d0,0.d0)  this is orginal
+          call manage_rock_tables(3,0,0,0,0.d0,0.d0,0.d0,0.d0,0.d0)
+         endif
+         
          else if(iflg.eq.1) then
 
 c load heat capacity

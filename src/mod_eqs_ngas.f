@@ -97,7 +97,8 @@ c
         ipiv=nelmdg(i)-neqp1
         a(nmat(3)+ipiv)=0.0
         a(nmat(6)+ipiv)=0.0
-        r(i+nrhs3)= phi(i)-psatl(t(i),pcp(i),dpcef(i),dpsatt,dpsats,0)
+        r(i+nrhs3)= phi(i)-psatl(t(i),pcp(i),
+     &                            dpcef(i),dpsatt,dpsats,0,0.d0)
         a(nmat(7)+ipiv)=1.0
         a(nmat(8)+ipiv)=-dpsats
         a(nmat(9)+ipiv)=-dpsatt

@@ -62,10 +62,16 @@ C***********************************************************************
       integer max_entries, line_length
       parameter(max_entries=20)
       character(*) line
-      integer imsg(max_entries)
-      integer msg(max_entries)
-      real*8 xmsg(max_entries)
-      character*32 cmsg(max_entries)
+c xhua error#7983: The storage extent of the dummy argument exceeds that of the actual argument       
+c      integer imsg(max_entries)  this is original
+c      integer msg(max_entries)
+c      real*8 xmsg(max_entries)
+c      character*32 cmsg(max_entries)      
+      integer imsg(*), msg(*)
+      real*8 xmsg(*)
+      character*32 cmsg(*)
+      
+      
       integer nwds
       logical finished
 

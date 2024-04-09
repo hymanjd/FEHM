@@ -601,14 +601,18 @@ c Use values from input
             rerr = 0
             backspace (iread)
             read (iread, *) ncount, geom_type
-            modneq = mod(ncount,neq)
+c gaz 063020 mod is not correct here changing to difference       
+c            modneq = mod(ncount,neq)
+            modneq = ncount - neq
             if(geom_type.eq.'gdpm') gdpm_read = .TRUE.
             if (gdpm_read) then
                modneq_primary = 0
             else
                modneq_primary = mod(ncount,neq_primary)
             end if
-            if (modneq .ne. 0 .or. modneq_primary .ne. 0) goto 2000
+c gaz 063020 diskwrite_new has no gdpm or gdkm            
+c            if (modneq .ne. 0 .or. modneq_primary .ne. 0) goto 2000
+            if (modneq .ne. 0) goto 2000
             do
                read (iread ,'(a11)', end = 100) dumflag
                select case (dumflag(1:4))

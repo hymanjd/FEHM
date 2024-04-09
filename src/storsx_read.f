@@ -74,6 +74,7 @@ c local
       integer :: max_con = 0
       integer, allocatable :: nelm_temp(:)
       integer, allocatable :: istrw_temp(:)
+      integer, allocatable :: neighbors_tmp(:)      
       real*8 tot
 c      character*100 filename, tail
       character*120 filename, tail
@@ -184,7 +185,10 @@ c     for connectivity when we have mdnodes
 
          if(imdnode.ne.0) then
             ncont_new=ncont
-            call md_nodes(4,0,ncont_new)
+c xhua error#8284 If the actual argument is scalar, the dummy argument shall be scalar 
+            neighbors_tmp(1) = 0
+            call md_nodes(4,neighbors_tmp,ncont_new)  
+            deallocate(neighbors_tmp)
          else
             ncont_new=ncont
          endif
@@ -304,7 +308,10 @@ c     when we have mdnodes
 c     
          if(imdnode.ne.0) then
             ncont_new=ncont
-            call md_nodes(4,0,ncont_new)
+c xhua error#8284 If the actual argument is scalar, the dummy argument shall be scalar 
+            neighbors_tmp(1) = 0
+            call md_nodes(4,neighbors_tmp,ncont_new)  
+            deallocate(neighbors_tmp)
          else
             ncont_new=ncont
          endif
@@ -429,7 +436,10 @@ c     when we have mdnodes
 c     
          if(imdnode.ne.0) then
             ncont_new=ncont
-            call md_nodes(4,0,ncont_new)
+c xhua error#8284 If the actual argument is scalar, the dummy argument shall be scalar 
+            neighbors_tmp(1) = 0
+            call md_nodes(4,neighbors_tmp,ncont_new)  
+            deallocate(neighbors_tmp)
          else
             ncont_new=ncont
          endif
@@ -596,7 +606,10 @@ c
 c     calculate additional storage if necessary for multiply defined nodes
 c     
       if(imdnode.ne.0) then
-         call md_nodes(5,0,ncont_new)
+c xhua error#8284 If the actual argument is scalar, the dummy argument shall be scalar 
+         neighbors_tmp(1) = 0
+         call md_nodes(5,neighbors_tmp,ncont_new)  
+         deallocate(neighbors_tmp)
       endif
 
       close  (isstor)

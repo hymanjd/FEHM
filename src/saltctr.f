@@ -589,7 +589,9 @@ c
 c original FEHM vaopr pressure
 c vapor pressure lowering in psatl enabled via ivapl parameter in comai
 c
-            pcl=pl-psatl(tl,pcp(mi),dpcef(mi),dpsatt,dpsats,0)
+c xhua error#6631 A non-optional actual argument must be present when invoking a procedure with an explicit interface
+c            pcl=pl-psatl(tl,pcp(mi),dpcef(mi),dpsatt,dpsats,0)  this is original
+            pcl=pl-psatl(tl,pcp(mi),dpcef(mi),dpsatt,dpsats,0,0.d0)
             pv=pl-pcl
             pci(mi) = pcl
             dum_salt = dpsatt
@@ -747,9 +749,11 @@ c        1         2         3         4         5         6        7 2       8
 		df = ( 1.1300 - 1.4320 * xf + 7.1690 * xf**2 - 33.170
      &          * xf**3 + 47.45 * xf**4) * 1.e-6
 				ef = 0.0
-			endif
+              endif
 c           Call psatl just to set dpsatt and dpsats derivatives
-            dumf = psatl(tl,pcp(mi),dpcef(mi),dpsatt,dpsats,0)
+c xhua error#6631 A non-optional actual argument must be present when invoking a procedure with an explicit interface
+c            dumf = psatl(tl,pcp(mi),dpcef(mi),dpsatt,dpsats,0)  this is original
+            dumf = psatl(tl,pcp(mi),dpcef(mi),dpsatt,dpsats,0,0.d0)
 
 c           Truncate function at 300C  and dump a statement to the screen
             if(tl.gt.300) then
@@ -775,7 +779,10 @@ c           Calculate gas pressure
      &   pl,tl,dumf,pv,pv/dumf,ms, xf,an(mi)
 c DRH 12/03/12 end.
          else
-            pcl=pl-psatl(tl,pcp(mi),dpcef(mi),dpsatt,dpsats,0)
+
+c xhua error#6631 A non-optional actual argument must be present when invoking a procedure with an explicit interface
+c            pcl=pl-psatl(tl,pcp(mi),dpcef(mi),dpsatt,dpsats,0)  this is original
+            pcl=pl-psatl(tl,pcp(mi),dpcef(mi),dpsatt,dpsats,0,0.d0)
             pv=pl-pcl
          end if          
         enddo

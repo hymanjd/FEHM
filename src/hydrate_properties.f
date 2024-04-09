@@ -93,7 +93,7 @@ c lhmsl - latent heat for methane solid to liquid phase change
 c lhmlv - latent heat for methane liquid to vapor phase change
       parameter(cpms=4.0d-3,cpml=4.178d-3,cpml1=9.897e-4,cpmv=0.002)
       parameter (pm0=7.0,tm0=5.0)
-      parameter(lhmsl=0.1,lhmlv=2.0,enthl0=2.796e-3)                     
+      parameter(lhmsl=0.1,lhmlv=2.0,enthl0=2.796e-3)                  
 c denms - reference density for methane solid
 c ddenmsp - derivative of solid density wrt pressure 
 c ddenmst - derivative of solid density wrt temperature

@@ -238,8 +238,11 @@
       real*8, allocatable :: ts53(:) 	      
 
 !     ***** Pointers in COMMON Block eq2 *****
-      real*8, allocatable ::  upwind_l(:)
-      real*8, allocatable ::  upwind_v(:)
+c xhua error#6633 The type of the actual argument differs from the type of the dummy argument 
+c      real*8, allocatable ::  upwind_l(:)   this is original
+c      real*8, allocatable ::  upwind_v(:)
+      integer, allocatable ::   upwind_l(:)
+      integer, allocatable ::   upwind_v(:)
       
 c parameters for anisotropy
 

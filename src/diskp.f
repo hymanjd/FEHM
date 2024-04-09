@@ -91,9 +91,9 @@ C***********************************************************************
       integer isolflg, i, idum, nwds, j
       real*8 dumm
       character*80 dummy_string
-      integer imsg(4),msg(4)
-      real*8  xmsg(4)
-      character*32 cmsg(4)
+      integer imsg(20),msg(20)
+      real*8  xmsg(20)
+      character*32 cmsg(20)
       character*11 ptrkword
       logical read_ptrk
             

@@ -76,9 +76,11 @@ C         iword() - THE STARTING LOCATION OF THE MOST-SIGNIFICANT-BIT.
 C
       implicit none
 
-      integer nbitnum,ibitnum,istate,iword(*)
+      integer nbitnum,ibitnum,iword(*)
       integer itotal, ichange, j, jchange, nwd1, jstate, idum, imask
-
+c xhua error#6633 The type of the actual argument differs from the type of the dummy argument     
+      real*8  istate
+      
 c     Note: for the Digital FORTRAN version comment out the 
 c     external line below
 

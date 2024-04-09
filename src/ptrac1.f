@@ -2113,7 +2113,7 @@ c     to begin ,place zcc slightly below -3 face of node_previous
             write(iptty,*)'stop in wtsi_neighbour2'
          endif
          call update_exit(-inp1,np1,-100,nodetemp,
-     $     0.,xc,yc,zc)
+     $     0.d0,xc,yc,zc)
 c         stop
       end if   
 

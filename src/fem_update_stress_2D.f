@@ -29,9 +29,14 @@
       integer                      :: k
       integer, dimension(4)        :: node
       real*8,  dimension(4)        :: alpha, beta, deltaT, deltaP
-      real*8,  dimension(3, 8)     :: B
-      real*8,  dimension(3, 3)     :: D
-      real*8,  dimension(3)        :: gp_stress, gp_strain
+c xhua error#7983 The storage extent of the dummy argument exceeds that of the actual argument [GP_STRAIN]
+c      real*8,  dimension(3, 8)     :: B     these are orginal
+c      real*8,  dimension(3, 3)     :: D
+c      real*8,  dimension(3)        :: gp_stress, gp_strain
+      real*8,  dimension(6, 8)     :: B
+      real*8,  dimension(6, 6)     :: D
+      real*8,  dimension(6)        :: gp_stress, gp_strain
+      
       real*8,  dimension(6)        :: gp_strain_mech
       real*8,  dimension(8)        :: disp
 

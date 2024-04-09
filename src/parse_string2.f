@@ -54,7 +54,7 @@ CD4 SPECIAL COMMENTS
 CD4
 CD4 Character strings containing only d,D,e,E and integers will
 CD4 not be accepted.
-CD4
+CD4 parse words in line and fill imsg,msg,xmsg,cmsg,nwds ndex
 C***********************************************************************
 
       implicit none
@@ -80,6 +80,18 @@ C***********************************************************************
 	
       ifdebug = 0
       line_length = len(line)
+
+c tam debug
+c memory is being overwritten somewhere 
+c parse_string is sensitive to garbage in the input line
+c so add a warning regarding unexpectedly long lines
+
+      if (line_length .gt. 180) then
+        print *, "Warning: parse_string2 line longer than 180 char"
+        print *, "  parse line len: ", line_length
+        print *, "  parse line: ", line 
+      endif
+
       entrynum=1
       begin=1
       do i=1,line_length
@@ -109,12 +121,19 @@ C***********************************************************************
       do i=1,nwds
          isint = .false.
          isrl = .false.
-         word = line(ndex(i,1):ndex(i,2))
 
-         if (ifdebug .eq. 1) then
-            write (6, *) 'ndex ', ndex(i,1), ndex(i,2)
-            write (6, *) 'string ', line(ndex(i,1):ndex(i,2))
+c tam debug line index 32765 gt then len 80 
+         ifdebug = 1
+
+         if (ifdebug .gt. 0 .and. ndex(i,2).gt.80) then
+            write (6, *) 'Error: parse_string2 line length exceeded.'
+            write (6, *) 'i: ', i
+            write (6, *) 'indices ndex(): ', ndex(i,1), ndex(i,2)
+            write (6, *) 'len(line): ', len(line)
+            write (6, *) 'line: ', line
          end if
+
+         word = line(ndex(i,1):ndex(i,2))
 
          call isinteger (word, inum, isint)
 

@@ -50,11 +50,14 @@ subroutine rlp_cap(ndummy)
   real*8 smcutm,smcutf,alpham,alamdam,facf,sw,sg,snw
   real*8 rl, rv, drls, drvs, rl1, rv1, drls1, drvs1, cp, dpcp
   real*8 drlw, drlg, drlk, drvw, drvg, drvk, drtw, drtg, drtk
-  real*8 skip,dum1,dum2,dum3,dummy,rlc,drlc,rt,drt,drl_wk  ,pn
+  real*8 skip,dum1,dum2,dum3,dummy,rlc,drlc,rt,drt,drl_wk
   !      real*8 drllg, rlv,drlvw,drlvg
   real*8 drls2,drvs2,blank(10)
   logical null1,ex
   character model_type*10
+! xhua error #7977: The type of the function reference does not match the type of the function 
+  character(len=30) :: phase_nam,pn
+  
   !     initialize everything as if single wetting phase
   if(icarb.ne.0) then
      pcp=0.
@@ -168,7 +171,9 @@ subroutine rlp_cap(ndummy)
         	iphase = cap_pos(it,k)
         	j = (iphase - 1) * max_cp
         	if (iphase.le.0) then
-           		write(ierr,*) 'no cap pressure model specified for ',k,pn(k)
+! xhua error #7977: The type of the function reference does not match the type of the function 
+!                phase_name = pn(k)
+           		write(ierr,*) 'no cap pressure model specified for ', k, pn(k)
            		stop
         	end if
 ! need to insert a special call for fracture case , with flag for fracture  
@@ -418,7 +423,9 @@ subroutine water_air_phase(ieosd,k)
   implicit none      	
   integer phase(3),k,mi,it,ieosd
   real*8 sw
-  if (ieosd.eq.1) then
+  if(ico2.lt.0) then
+    k=25  ! water/air  
+  else if (ieosd.eq.1) then
      !     single phase (water)
      k=2
   else if (ieosd .eq. 3) then
@@ -576,7 +583,7 @@ subroutine rlp1(itype,it,ir,sw,rw,drww,rnw,drnw_w)
   case(2)
      ! linear               
      ! p1, p2 are residual wetting and residual non-wetting saturations
-     call linear(sw, p1, p2, rw, drww)                 
+     call linear(sw, p1, p2, rw, drww)              
      rnw=1.-rw
      drnw_w=-1.*drww
 !	  write(230,*) 'in rlp1 ',sw,rw,rnw
@@ -688,17 +695,25 @@ subroutine rlp3(itype,it,ir,mi,sw,hp,dhp,rw,drww,rnw,drnw_w)
                    tol_l, tol_u, rw, drww,rnw,dummy)
              permb = akf * porf    
              if(rlp_fparam(it,kf+7)>0) then ! fracture interaction term was specified
-             	call rlp_frac2(1, mi, sw, rlp_fparam(it, kf + 1),rlp_fparam(it, kf + 2),rw, drww, 1.-rw, -drww, &
-                  rlp_fparam(it, kf  + 7))
-          	 end if
+                 
+! xhua error#6784 The number of actual arguments cannot be greater than the number of dummy arguments  
+!       	     call rlp_frac2(1, mi, sw, rlp_fparam(it, kf + 1),rlp_fparam(it, kf + 2),rw, drww, 1.-rw, -drww, &
+!                    rlp_fparam(it, kf  + 7))
+                call rlp_frac2(1, mi, sw,rw, drww, 1.-rw, -drww, rlp_fparam(it, kf  + 7))
+             end if
+             
           else  ! matrix
             call vgrlps(iflag, sw,  rlp_param(it, k + 1), &
                   rlp_param(it, k + 2), 1.-1./rlp_param(it, k + 3), &
                    tol_l, tol_u, rw, drww,rnw,dummy)
               permb = akm * (1. - porf)
              if(rlp_fparam(it,kf+7)>0) then ! fracture interaction term was specified
-             	call rlp_frac2(1, mi, sw, rlp_param(it, k + 1),rlp_param(it, k + 2), rw, drww, 1.-rw, -drww, &
-                  rlp_fparam(it, kf  + 7))
+                 
+! xhua error#6784 The number of actual arguments cannot be greater than the number of dummy arguments  
+!       	     call rlp_frac2(1, mi, sw, rlp_fparam(it, kf + 1),rlp_fparam(it, kf + 2),rw, drww, 1.-rw, -drww, &
+!                    rlp_fparam(it, kf  + 7))                 
+                call rlp_frac2(1, mi, sw,rw, drww, 1.-rw, -drww, rlp_fparam(it, kf  + 7))
+                
           	 end if
           endif
 		else  

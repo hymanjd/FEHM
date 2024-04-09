@@ -75,7 +75,9 @@ C***********************************************************************
 
       integer iout, iptty, irdof, iter, maxor, mcount 
       integer nbnd, neq, niter, north, mink
-      integer it1(20),it2(20),npvtr(1),irbd(1)
+      integer it1(20),it2(20)
+c xhua error#6633 The type of the actual argument differs from the type of the dummy argument
+      real*8 npvtr(*),irbd(*)
       integer irb(*),iirb(*),nopt(*),npvt(*)
       integer i, i1, i2, i3, i4, iback, ic, icount, id, ig, ik , im
       integer in, inn, io, ioo, iterg, iterh, itr
@@ -89,6 +91,7 @@ C***********************************************************************
       real*8  xtemp(*),dum(*),rw(*),piv(*),xx(*)
       real*8  h(*),c(*),ss(*),g(*),y(*)
       real*8  an(*),bn(*),resid(*),delx(*),dum1(*)
+c      real*8 ::   irbd,npvtr
       real*8  dum1d
       real*8  fdum, fdum2, epn2
       real*8  residi, rsum, sum

@@ -480,6 +480,9 @@ C***********************************************************************
       use comco2
       use comdi
       use comdti
+c gaz debug 042120      
+      use comfi, only : pci, imod_sol, alpha0, idiff_iso, q_gas,
+     &                 q_gas_tot                                                                
       use comevap, only : evaporation_flag
       use comflow, only: flag_heat_out
       use compart
@@ -490,7 +493,10 @@ C***********************************************************************
       use comsptr
       use comwt
       use davidi
-	use trxnvars
+      use trxnvars
+      use com_exphase
+c gaz 040122 added access to commass_AWH     
+      use commass_AWH, only : imass_phase
       implicit none
 
       integer i, izone, inode
@@ -507,17 +513,24 @@ c gaz 062718
       character*5 cden_type
       character*32 cmsg(20)
       character*30 zonesavename
+      
+      integer, allocatable :: neighbors_tmp(:)
 
+c begin
       sssol = 'no  '
       altc = 'fehm'
       inptorig = inpt
 
+c     initialize parse_string2 parameters
+      nwds = 0
       imsg = 0
       xmsg = 0.
       cmsg = ''
+
+c gaz 020522 enable vtk call
+      i_vtk = 0
       macro = ''
       last_macro = ''
-      
       flag_heat_out = .false.      
 
       read (inptorig, '(a80)') wdd
@@ -542,8 +555,9 @@ c confirm this is the terminator for the last macro read
          go to 100
       end if
  798  format ( 'WARNING : input title : ', 
-     &     a4, ' unlabeled macro terminator')
-         
+     &     a4, ' unlabeled macro terminator',/)
+        
+      nwds = 0 
       call parse_string2(wdd1,imsg,msg,xmsg,cmsg,nwds)
 
       if (nwds .gt. 1) then
@@ -607,7 +621,10 @@ c**** isothermal air - water transport ****
          read(inpt,*) ico2
          ico2 = -2
          call airctr (0, 0)
-
+      else if (macro(1:4) .eq. 'idfe') then
+c**** overwrite fehm verno in dated.f
+         read(inpt,'(a30)') verno_fehmid
+         idfehm = 1
       else if (macro(1:4) .eq. 'para') then
 c**** parallel FEHM implimentation (isothermal only)***
          ipara = 1
@@ -668,6 +685,8 @@ c zvd 12-Jul-2010 Only activate if this isn't a head problem
          if (ihead .eq. 0) then
             backspace inpt
             read(inpt,'(a80)') input_msg 
+
+            nwds = 0
             call parse_string(input_msg,imsg,msg,xmsg,cmsg,nwds)
 c            read(input_msg,*,end= 995) macro, head0, temp0, pres0, 
 c     &           sat_ich, head_id
@@ -711,6 +730,7 @@ c don't break connection between nodes with boundary conditions
 c new form cden FEHM ver 3.2
          backspace (inpt)
          read (inpt, '(a80)') input_msg
+         nwds = 0
          call parse_string(input_msg,imsg,msg,xmsg,cmsg,nwds)
          if (nwds .gt. 1) then
             cden_type = cmsg(2)
@@ -761,10 +781,27 @@ c**** node coordinate data, read in incoord subroutine ****
          go  to  110
  115     continue
 
-      else if (macro .eq. 'cond') then
+      else if (macro .eq. 'cond'.or.macro .eq. 'diff') then
 c**** thermal conductivity data ****
-         call incond
-
+         if(ico2.lt.0.and.macro.eq.'diff') then
+          idiff_iso = 1
+          if(.not.allocated(q_gas)) then
+           allocate(q_gas(n0))
+           q_gas = 0.0d0
+          endif
+c gaz 010124 comment added late
+          if(.not.allocated(thx)) then
+           allocate(thx(n0))
+           allocate(thy(n0))
+           allocate(thz(n0))
+           thx = 0.0d0
+           thy = 0.0d0
+           thz = 0.0d0
+          endif
+          call indiff
+         else 
+          call incond
+         endif
       else if (macro .eq. 'conn') then
 c**** connections_list ****
          connect_out = .true.
@@ -777,10 +814,16 @@ c**** contour plot information ****
          backspace inpt
          if(altc .eq. 'ptrn' .or. altc .eq. 'ment' .or. altc .eq. 'fehm'
      &        .or. altc .eq. 'free' .or. altc(1:3) .eq. 'avs' .or. 
-     &        altc(1:3) .eq. 'sur' .or. altc(1:3) .eq. 'tec') then
+     &        altc(1:3) .eq. 'sur' .or. altc(1:3) .eq. 'tec' .or.
+     &        altc(1:3) .eq. 'vtk') then
             read(inpt, '(a)') input_msg
+            nwds = 0
             call parse_string(input_msg,imsg,msg,xmsg,cmsg,nwds)
             altc = cmsg(1)
+            if(altc.eq.'vtk ') then
+             altc = 'tec '
+             i_vtk = 1
+            endif
             ncntr = imsg(2)
             if (msg(3).eq.1) then
                contim=imsg(3)
@@ -799,8 +842,13 @@ c**** contour plot information ****
             read(inpt,*) ncntr, contim
             altc = 'fehm'
          endif
-         if (iout .ne. 0) write(iout, 6010) altc  
+         if(i_vtk.ne.1) then
+          if (iout .ne. 0) write(iout, 6010) altc  
+         else
+          if (iout .ne. 0) write(iout, 6011)   
+         endif
  6010    format(1x, '**** contour format defined  : ', a4, ' ****')
+ 6011    format(1x, '**** contour format defined  : vtk (from tec)')        
          if (ncntr .le. 0) ncntr = 10000000
          if (abs(contim) .le. zero_t) then
             contim_rip = -abs(contim)
@@ -835,7 +883,7 @@ c**** element node data, read in incoord subroutine  ****
  125     continue
 
       else if (macro .eq. 'eos ') then
-c**** forms simple water eos and/or changes the eos set number ****
+c**** forms simple water eos, hi temp tabular eos, and/or changes the eos set number ****
          iieosd =  0
          call sther (iieosd)
       else if (macro .eq. 'den ') then
@@ -921,9 +969,16 @@ c**** flux correction for saturations over 1
 
       else if (macro .eq. 'exrl') then
 c**** explicit evaluation of relative permeability ****
-
          read(inpt,*) iexrlp
-
+      else if (macro .eq. 'mcpc') then
+c gaz 040122 added capability to change phase state variables for AWH      
+       imass_phase = 1
+       call varchk_AWH(0)
+      else if (macro .eq. 'exph') then
+c**** explicit update phase change variables ****
+c**** mass conservation phase change ****
+       i_ex_update = 1
+       call explicit_phase_update(-1,0)       
       else if (macro .eq. 'svar') then
 c**** switch varables, limited now to pressure-enthalpy ****
 
@@ -935,6 +990,7 @@ c**** read in sources and sinks - time dependent mode ****
          iboun=1
          backspace (inpt)
          read(inpt,'(a80)') input_msg
+         nwds = 0
          call parse_string(input_msg,imsg,msg,xmsg,cmsg,nwds)
          if (nwds .ge. 2) then
             if (msg(2) .eq. 3) then
@@ -961,6 +1017,7 @@ c s kelkar 3 July 2014, for calculating heat flow vectors
 c**** calculate concentration flux ****
          backspace (inpt)
          read(inpt,'(a80)') input_msg
+         nwds = 0
          call parse_string(input_msg,imsg,msg,xmsg,cmsg,nwds)
          if (nwds .gt. 1) then
             cflx_var = .false.
@@ -992,6 +1049,7 @@ c     Loop over each zone for determining izoncflxz array
 c**** calculate intermode fluxes ****
          backspace inpt
          read(inpt,'(a80)') input_msg 
+         nwds = 0
          call parse_string(input_msg,imsg,msg,xmsg,cmsg,nwds)
 c No additional keywords both water and air (vapor) fluxes (if 2-phase) 
 c will be output 
@@ -1064,7 +1122,9 @@ c output tet grid for inputted hex grid
 c*** set far field boundary conditions
          ibcfar = 1
          call bc_far_ctr(0) 
-                 
+      else  if (macro .eq. 'henr') then
+c**** read in henry's law constant and model number for AWH **** 
+          read(inpt,*) imod_sol, alpha0    
       else  if (macro .eq. 'hflx') then
 c**** read in heat source term(w) ****
          call inhflx(macro)
@@ -1132,12 +1192,19 @@ c**** iteration parameters ****
          read (inpt, *) g1, g2, g3, tmch, overf
          read (inpt, *) irdof, islord, iback, icoupl, rnmax
          if (ihead .eq. 1 .and. irdof .ne. 13) then
-            if (iout .ne. 0) write(iout,*) "Warning: irdof = 13 for ",
-     &           "head problem"
+          if (iout .ne. 0) write(iout,*) "Warning: setting irdof = 13 ",
+     &           "for head problem"
             if (iptty .gt. 0) write(iptty,*) 
-     .           "Warning: irdof = 13 for head problem"
+     &           "Warning: setting irdof = 13 for head problem"
             irdof = 13
          end if
+         if(idoff.lt.0. and. irdof.eq.13) then
+          irdof = 0
+            if (iptty .gt. 0) write(iptty,*) 
+     &           "Warning: setting irdof = 0, heat cond problem"
+            if (iout .gt. 0) write(iout,*) 
+     &           "Warning: setting irdof = 0, heat cond problem"
+         endif
          if (rnmax .lt. zero_t) rnmax = 1.0d+06
          rnmax = rnmax * 60.0
          if(tmch.lt.0.0) then
@@ -1149,7 +1216,15 @@ c**** iteration parameters ****
          if(irdof.lt.0) then
             overf = 1.0
          endif
-
+c gaz 041620  if richards solution(jswitch.ne.0) , set irdof = 0
+        if (jswitch.ne.0.and.irdof.eq.13) then
+          if (iout .ne. 0) write(iout,*) "Warning: setting irdof = 0 ",
+     &           "for Richard's problem"
+            if (iptty .gt. 0) write(iptty,*) 
+     &           "Warning: setting irdof = 0 for Richard's  problem"            
+          irdof = 0
+        endif
+          
       else if (macro .eq. 'ittm') then
 c**** sticking time for phase changes      
          read (inpt, *) time_ch
@@ -1178,8 +1253,10 @@ c**** enable vfcal routine ****
       else if (macro .eq. 'mdno') then
 c**** multiply defined nodes ****
          imdnode = 1 
-         call md_nodes(0,0,0)                
-
+c xhua error#8284 If the actual argument is scalar, the dummy argument shall be scalar 
+         neighbors_tmp(1) = 0
+         call md_nodes(0,neighbors_tmp,0)
+         deallocate(neighbors_tmp)
       else if (macro .eq. 'mptr') then
 c**** particle tracking ****
 c     inmptr is called in part_track instead of here
@@ -1311,7 +1388,8 @@ c **** compute with active variables
        iactive = 1
        call active_nodes_ctr(0)
 
-      else if (macro .eq. 'ngas' .or. macro .eq. 'co2i') then
+      else if (macro .eq. 'ngas' .or. macro .eq. 'co2w') then
+c gaz 081921 changed from co2i to co2w(h)
 c**** noncondensible gas ****
          ico2 = 3
          call co2ctr (0)
@@ -1398,9 +1476,9 @@ c         read (inpt,*) strd_rich, tol_phase
 c     0.95  1.e-5  0.001 0.001
          read (wdd1,*,end = 598) strd_rich, tol_phase, pchng, schng 
          go to 599
- 598     continue
-         pchng = 0.005
-         schng = 0.005
+ 598     continue   
+         pchng = 1.d-3
+         schng = 1.d-3 
  599     continue
 
       else if (macro .eq. 'rock') then
@@ -1452,7 +1530,7 @@ c gaz 11-27-2001
       else if (macro .eq. 'stea') then
 c**** Steady state solution  ****
          isteady = -1
-         call steady(0, 0., 0.)
+         call steady(0, 0.d0, 0.d0)
          
       else if (macro .eq. 'subm') then
 c**** print out sub model boundary conditions
@@ -1594,13 +1672,19 @@ c**** Zeolite water balance input
 
       else if (macro .eq. 'zone') then
 c**** set zone information ****
+c gaz 080320 add calls to write multiple porosity info(*.chk file)
          cnum = cnum + 1
          call zone(cnum, inpt)
+c gaz 050721          
+c         if(gdpm_flag.or.gdkm_flag) call zone_out_gdpm shaoping email 050421
+         if(gdpm_flag.ne.0 .or. gdkm_flag.ne.0) call zone_out_gdpm
       else if (macro .eq. 'zonn') then
 c**** set zone information ****
          cnum = cnum + 1
          call zone(cnum, inpt)
-
+c gaz 050721          
+c         if(gdpm_flag.or.gdkm_flag) call zone_out_gdpm shaoping email 050421
+         if(gdpm_flag.ne.0 .or. gdkm_flag.ne.0) call zone_out_gdpm
       else
 c**** error occurred ****
          write(ierr, 6100) macro
@@ -1635,12 +1719,12 @@ c**** if both dual and dpdp are enabled, disable dual ****
       call dual (3)
       call dpdp (6)
 c**** check if gravity is present and modify head solution as necessary
-      call headctr(0,0,0.0,0.0)
+      call headctr(0,0,0.d0,0.d0)
 c**** check if air macro called if head macro called
-      call headctr(1,0,0.0,0.0)
+      call headctr(1,0,0.d0,0.d0)
 
  210  continue
-      call steady(-1,0.,0.)
+      call steady(-1,0.d0,0.d0)
 c**** open files for salt module read and write
       if(isalt.ne.0) call saltctr(-20,0,0.0d00,0.0d00)
       if(.not.allocated(time_ieos)) then

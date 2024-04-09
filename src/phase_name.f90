@@ -108,54 +108,56 @@ function ic(name, ictype)
      stop
   end select
   return
-end function ic
-function pn(k)
+    end function ic
+    
+! xhua error #7977: The type of the function reference does not match the type of the function 
+function pn(k) result(phase_nam)
   implicit none
-  character*30 pn
-  integer k
+  character*30 :: phase_nam
+  integer :: k
   select case(k)
   case(2,3)
-     pn='water'
+     phase_nam='water'
   case(1)	
-     pn='air'
+     phase_nam='air'
   case(5)
-     pn='h2o_gas'
+     phase_nam='h2o_gas'
   case(4)
-     pn='co2_gas'
+     phase_nam='co2_gas'
   case(6)
-     pn='co2_liquid'
+     phase_nam='co2_liquid'
   case(9)
-     pn='co2_sc'
+     phase_nam='co2_sc'
   case(11)
-     pn='methane_hydrate'
+     phase_nam='methane_hydrate'
   case(7)
-     pn='oil'
+     phase_nam='oil'
   case(8)
-     pn='gas'
+     phase_nam='gas'
   case(23)
-     pn= 'water/oil'
+     phase_nam= 'water/oil'
   case(27)
-     pn= 'gas/oil'
+     phase_nam= 'gas/oil'
   case(25)
-     pn='air/water'
+     phase_nam='air/water'
   case(20)
-     pn='water/co2_liquid'
+     phase_nam='water/co2_liquid'
   case(21)
-     pn='water/co2_gas'
+     phase_nam='water/co2_gas'
   case(22)
-     pn='co2_liquid/co2_gas'
+     phase_nam='co2_liquid/co2_gas'
   case(28)
-     pn='water/vapor'
+     phase_nam='water/vapor'
   case(29)
-     pn='air/vapor'
+     phase_nam='air/vapor'
   case(24)
-     pn='gas/water'
+     phase_nam='gas/water'
   case(26)
-     pn='water/co2_liquid/co2_gas'
+     phase_nam='water/co2_liquid/co2_gas'
   case(10)             		
-     pn='liquid/gas'   ! not sure what this means    
+     phase_nam='liquid/gas'   ! not sure what this means    
   case default
-     pn='unrecognized phase'
+     phase_nam='unrecognized phase'
   end select
   return
 end function pn

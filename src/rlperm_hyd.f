@@ -259,8 +259,13 @@ c rlp(S)
      3                 rp10f(it), rp6f(it), su_cut,
      4                 cp1f(it),cp2f(it),hp, dhp ,ireg    )
                   star = (sl-rp1f(it))/(rp2f(it)-rp1f(it))
-                  call  vgrlps(2, sl, star, rp3, rp4, rp1, rp2, 
-     2                  tol_l, tol_u, rl, drls, rv, drvs )
+                  
+c xhua error6784 The number of actual arguments cannot be greater than the number of dummy arguments
+c                  call  vgrlps(2, sl, star, rp3, rp4, rp1, rp2,    this is original
+c     2                  tol_l, tol_u, rl, drls, rv, drvs) 
+                  call  vgrlps(2, sl, rp1, rp2, rp4,
+     2                  tol_l, tol_u, rl, drls, rv, drvs)  
+                                     
                   pcp(mi) = 9.8e-3 * hp
                   dpcef(mi) = 9.8e-3 * dhp
                elseif(irpd.eq.4) then
@@ -360,9 +365,14 @@ c
      3                       rp23f(it), rp16f(it), su_cut,    
      4                       cp3f(it),cp4f(it),hp, dhp, ireg    )
                         star = (sl-rp11f(it))/(rp12f(it)-rp11f(it))
-                        call  vgrlps(2, sl, star, rp13f(it),
-     2                  rp14f(it), rp11f(it), rp12f(it),
-     3                  tol_l, tol_u, rl, drls, rv, drvs)
+                        
+c xhua error6784 The number of actual arguments cannot be greater than the number of dummy arguments
+c                        call  vgrlps(2, sl, star, rp13f(it),    this is original
+c     2                  rp14f(it), rp11f(it), rp12f(it),
+c     3                  tol_l, tol_u, rl, drls, rv, drvs) 
+                        call  vgrlps(2, sl, rp11f(it), rp12f(it),
+     2                  rp14f(it), tol_l, tol_u, rl, drls, rv, drvs) 
+          
                         permb = akf * porf
                       if(irpd.eq.7) then
 c calculate fracture term(from Sandia) if necessary
@@ -377,8 +387,13 @@ c calculate fracture term(from Sandia) if necessary
      3                       rp10f(it), rp6f(it), su_cut,      
      4                       cp1f(it),cp2f(it),hp, dhp, ireg    )
                         star = (sl-rp1f(it))/(rp2f(it)-rp1f(it))
-                        call  vgrlps(2, sl, star, rp3, rp4, rp1, rp2, 
-     2                  tol_l, tol_u, rl, drls, rv, drvs )
+                        
+c xhua error6784 The number of actual arguments cannot be greater than the number of dummy arguments
+c                        call  vgrlps(2, sl, star, rp3, rp4, rp1, rp2,    this is original
+c     2                       tol_l, tol_u, rl, drls, rv, drvs) 
+                        call  vgrlps(2, sl, rp1, rp2, rp4,
+     2                       tol_l, tol_u, rl, drls, rv, drvs)  
+                        
                         permb = akm * (1. - porf)
                       if(irpd.eq.7) then
 c calculate fracture term(from Sandia) if necessary
@@ -394,12 +409,22 @@ c calculate fracture term(from Sandia) if necessary
      3                    rp10f(it), rp6f(it), su_cut,      
      4                    cp1f(it),cp2f(it),hp, dhp, ireg    )
                      star = (sl-rp1f(it))/(rp2f(it)-rp1f(it))
-                     call  vgrlps(2, sl, star, rp3, rp4, rp1, rp2, 
-     2                  tol_l, tol_u, rl, drls, rv, drvs )
+                     
+c xhua error6784 The number of actual arguments cannot be greater than the number of dummy arguments
+c                     call  vgrlps(2, sl, star, rp3, rp4, rp1, rp2,    this is original
+c     2                        tol_l, tol_u, rl, drls, rv, drvs) 
+                     call  vgrlps(2, sl, rp1, rp2, rp4,
+     2                       tol_l, tol_u, rl, drls, rv, drvs)  
+                        
                      star = (sl-rp11f(it))/(rp12f(it)-rp11f(it))
-                        call  vgrlps(2, sl, star, rp13f(it),
-     2                  rp14f(it), rp11f(it), rp12f(it),
-     3                  tol_l, tol_u, rl1, drls1, rv1, drvs1)
+                                       
+c xhua error6784 The number of actual arguments cannot be greater than the number of dummy arguments
+c                        call  vgrlps(2, sl, star, rp13f(it),      this is original
+c     2                  rp14f(it), rp11f(it), rp12f(it),
+c     3                  tol_l, tol_u, rl, drls, rv, drvs) 
+                        call  vgrlps(2, sl, rp11f(it), rp12f(it),
+     2                    rp14f(it), tol_l, tol_u, rl, drls, rv, drvs)  
+                                          
                      permb = akf * porf + akm * (1. - porf)
                      rl=(akf*rl1*porf+akm*rl*(1.0-porf))/permb
                      drls=(akf*drls1*porf+akm*drls*(1.0-porf))/permb

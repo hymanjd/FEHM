@@ -81,6 +81,11 @@ c using storage for a matrix
       integer, allocatable :: nsf(:)
       integer, allocatable :: iplace(:)
 
+c xhua define temp arrary      
+      real*8, allocatable :: volest_tmp(:), x12_tmp(:), x13_tmp(:)
+      real*8, allocatable :: x14_tmp(:),y12_tmp(:),y13_tmp(:),y14_tmp(:)
+      integer, allocatable :: neighbors_tmp(:)
+      
       integer, allocatable :: ncon_elem(:,:)
       integer, allocatable :: ncon_pos(:,:)
 c
@@ -386,9 +391,19 @@ c     prisms always are non orthogonal
                enddo
 c     procedure for 3 node triangles in 3-d
 c     calculate volume
+               
+c xhua error#8284 If the actual argument is scalar, the dummy argument shall be scalar
+               volest_tmp(1)=volest
+               x12_tmp(1)=x12
+               x13_tmp(1)=x13
+               x14_tmp(1)=x14
+               y12_tmp(1)=y12
+               y13_tmp(1)=y13
+               y14_tmp(1)=y14
                call area2d_tri(1,dm(1,1),dm(1,2),dm(1,3),
      &              dm(2,1),dm(2,2),dm(2,3),dm(3,1),dm(3,2),dm(3,3),    
-     &              volest,x12,x13,x14,y12,y13,y14)                
+     &              volest_tmp(1),x12_tmp(1),x13_tmp(1),x14_tmp(1),
+     &               y12_tmp(1),y13_tmp(1),y14_tmp(1))                
                vole(ie) = volest
 c     triangles always are non orthogonal
                iorth(ie) = 0
@@ -1173,8 +1188,10 @@ c
 c     call md_nodes to break connections for those nodes
 c     md_nodes and connection breaks need to be done with 
 c     sx_x,sx_y,sx_z,etc.
-c     
-      call md_nodes(2,0,0)                            
+c    
+c xhua error#8284 If the actual argument is scalar, the dummy argument shall be scalar 
+      neighbors_tmp(1) = 0
+      call md_nodes(2,neighbors_tmp,0)                            
 c    
 c  we must figure these out 
 c      deallocate(ncon_temp_1,ncon_temp_2)

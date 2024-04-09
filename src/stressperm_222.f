@@ -29,7 +29,7 @@ c combined tensil and shear stress(2 and 22) model
       real*8 str_x_eff, str_y_eff, str_z_eff
       real*8 xperm_stry,xperm_strz, yperm_strx,yperm_strz
       real*8 zperm_strx,zperm_stry
-      real*8 fac(3,3),fac_E(3)
+      real*8 fac(3,3),fac_E(3), fac_por
 c      real*8 eigenvec(3,3),alambda(3),rm(3,3)
       real*8 rm(3,3)
 c     
@@ -220,7 +220,9 @@ c now do permeability enhanced by shear
                write(91,*)i
                itemp_perm22(i) = 1
             endif
-            call stressperm_22_perm(i,rm, fac)
+c xhua error#6631 A non-optional actual argument must be present when invoking a procedure with an explicit interface
+c            call stressperm_22_perm(i,rm, fac, fac_por)   this is original
+            call stressperm_22_perm(i,rm, fac, fac_por)
             call stressperm_22_emod(i,rm,fac_E)
          endif
 

@@ -314,9 +314,10 @@ C***********************************************************************
       real*8  cord1, cord2, cord3, detja, dnga, dterm
       real*8  sa11, sa12, sa13, sa21, sa22, sa23, sa31, sa32, sa33
       real*8  vold, vold4, volt, wxnga, wynga, wznga
-      real*8 vol_tol
+      real*8  vol_tol
       parameter (vol_tol = -1.d-12)
-
+c xhua define temp arrary      
+      real*8, allocatable :: volt_tmp(:)
       
 c     if icsh=1 calculate jacobian information
 c     
@@ -420,9 +421,11 @@ c     2-d triangles in 3-d space
                yt(jz)=cord(kb,2)
                zt(jz)=cord(kb,3)
             enddo
+c xhua error#8284 If the actual argument is scalar, the dummy argument shall be scalar
+               volt_tmp(1)=volt
             call area2d_tri(1,xt(1),yt(1),zt(1),
      &           xt(2),yt(2),zt(2),xt(3),yt(3),zt(3),                 
-     &           volt,vpebi(1),vpebi(2),vpebi(3),
+     &           volt_tmp(1),vpebi(1),vpebi(2),vpebi(3),
      &           cpb(1,1),cpb(2,1),cpb(3,1))
 
             do jz=1,3

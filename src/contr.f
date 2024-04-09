@@ -333,7 +333,7 @@ C***********************************************************************
       use davidi
 
       implicit none
-
+ 
       real*8 px, py, pz
       real*8 anld,anvd
       real*8 phihd, sdum, hddum, phipcp
@@ -346,7 +346,18 @@ C***********************************************************************
 c check for contour file output form
 c call veloc calculations here
 c both vapor and liquid velocities calculated with one call
-      if(inj.gt.0.and.compute_flow) call veloc
+c gaz 020122 call to vtk conversion      
+      if(inj.eq.2) then
+       call FEHM_tec_to_vtk(1)
+       return
+      endif  
+c gaz 021523 testing flow rate vectors
+c      if(inj.gt.0.and.compute_flow) call veloc
+       if(inj.gt.0.and.compute_flow) then
+        call flowrate_vectors(-1)
+        call flowrate_vectors(1)
+        call flowrate_vectors(-2)
+       endif
 
 c add call to heatloc to calculate heat fluxes for output
       if (inj.gt.0.and.flag_heat_out) call heatloc
@@ -367,7 +378,7 @@ c gaz 083119 don't turn head on exept to printout
          call water_density(tdum,pdum,rolconv)
          crl(1,1)=rolconv
          crl(4,1)=pres0
-         call headctr(2,0,0.,0.)           
+         call headctr(2,0,0.d0,0.d0)           
          crl(1,1)= dumconv
          crl(4,1)= dumconv1 
          if(ihead_sv.eq.0) then
@@ -379,7 +390,7 @@ c gaz 083119 don't turn head on exept to printout
 c
 c convert from pressure to head
 c
-            call headctr(2,0,0.0,0.0)
+            call headctr(2,0,0.d0,0.d0)
 	    if(ifree.ne.0) then
                do i = 1,n
                   if(rlxyf(i).lt.sattol+rlptol) head(i) = head_id
@@ -393,17 +404,17 @@ c
       endif
       if (altc(1:3) .eq. 'avs' .or. altc(1:3) .eq. 'sur'.or. 
      &     altc(1:3) .eq. 'tec') then
-c use avs form
+c use avs form        
          if (inj .eq. 0) then
             inquire (file = nmfil(10), exist = ex)
-            if (ex) then
+            if (ex.and.iscon.ne.0) then
                close (iscon, status = 'delete')
             end if
             inquire (file = nmfil(11), exist = ex)
-            if (ex) then
+            if (ex.and.iscon1.ne.0) then
                close (iscon1, status = 'delete')
             end if
-         end if
+         end if       
          call avs_io(inj)
 !      else if (altc(1:3) .eq. 'sur'.or. altc(1:3) .eq. 'tec') then
 !         call surf_tec(inj)

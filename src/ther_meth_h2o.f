@@ -158,9 +158,9 @@ c     new cappilary pressure routine
 
          do mid=1,neq
             mi=mid+ndummy
-            call rlperm_hyd(ndummy,0,mi,rl_h2o(mi),0.0,0.0,
+            call rlperm_hyd(ndummy,0,mi,rl_h2o(mi),0.d0,0.d0,
      &           drl_h2o3(mi),drl_h2o4(mi),rl_meth(mi),
-     &           0.0,0.0,drl_meth3(mi),drl_meth4(mi))
+     &           0.d0,0.d0,drl_meth3(mi),drl_meth4(mi))
 
          enddo 
 

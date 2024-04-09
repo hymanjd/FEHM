@@ -32,13 +32,20 @@
       integer                      :: i,j,k,li,m,ii1,ii2
       integer                      :: nodei, nodej, jmia, iau
       integer, dimension(4)        :: node
-      real*8,  dimension(3, 8)     :: B
-      real*8,  dimension(3, 3)     :: D
-      real*8,  dimension(3, 8)     :: DB
+c xhua error#7983 The storage extent of the dummy argument exceeds that of the actual argument
+c      real*8,  dimension(3, 8)     :: B   this is original
+c      real*8,  dimension(3,3)      :: D  
+c      real*8,  dimension(3, 8)     :: DB
+c      real*8,  dimension(3)        :: gp_stress
+      real*8,  dimension(6, 8)     :: B
+      real*8,  dimension(6, 6)     :: D
+      real*8,  dimension(6, 8)     :: DB
       real*8,  dimension(8, 8)     :: BtDB
       real*8,  dimension(2, 2)     :: nodalK
-      real*8,  dimension(3)        :: gp_stress
+      real*8,  dimension(6)        :: gp_stress
+      
       real*8,  dimension(8)        :: Btsigma
+      
       real*8,  dimension(4)        :: bforcex, bforcey, bforcez
 
       real*8                       :: e1bar, e2bar, e3bar

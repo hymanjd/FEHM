@@ -117,7 +117,8 @@ c                  George Zyvoloski, EES-5
       integer:: iold,iold1,jj,lns,lns1,kin1,itmpin,kin2,kin2_1,rloc
       integer:: idaughter,lstart,nps, failed_nodes !cli_added failed_nodes
       real:: ran_sp
-      real*8:: inc,inflow,tmim, denom
+      real*8:: inc,inflow, denom
+      real :: tmim
 
       real, parameter:: dayinsecs=86400. 
 

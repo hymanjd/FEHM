@@ -77,10 +77,13 @@ C***********************************************************************
       use comuserc
       implicit  none
 
-      integer jl,ju,jm,iz,i2
+      integer jl,ju,jm,iz, i2
       real*8 slope,getconc,timein,getflux
-      integer, optional :: i
-      real(8), optional :: rc_ss, drc_ss
+c xhua error#8055 The procedure has a dummy argument that has the ALLOCATABLE, ASYNCHRONOUS, OPTIONAL, POINTER, TARGET 
+c      integer, optional :: i
+c      real(8), optional :: rc_ss, drc_ss
+      integer :: i
+      real*8 :: rc_ss, drc_ss
       integer ispecies, j, k, k1, curcolumn
       integer, allocatable :: nsindex(:)
       integer nsnodes, iread1, nszones, mi, mim

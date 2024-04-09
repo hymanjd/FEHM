@@ -76,7 +76,9 @@
           
           !!! Get D matrix from material module
           if(iPlastic.eq.1) then
-            call fem_material_stiffness(i, j, D, iUnload)
+c xhua error# The number of actual arguments cannot be greater than the number of dummy arguments              
+c            call fem_material_stiffness(i, j, D, iUnload)  this is original
+            call fem_material_stiffness(i, j, D)
           else
             if (stress_anisotropy_in) then
             

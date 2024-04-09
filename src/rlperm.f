@@ -448,14 +448,15 @@ c * * * *
       implicit none
 
       real*8 scutm,hmin,darcyf,tol_l,tol_u,su_cut 
-      parameter(scutm = 1.d-03)
-      parameter(hmin = 1.d-8)
+      parameter(scutm = 1.d-05)
+      parameter(hmin = 1.d-10)
       parameter(darcyf = 1.d12)
       parameter(tol_l  = 1.d-5)
       parameter(tol_u  = 1.d-5)
-      parameter(su_cut = 0.99d00)
-c      parameter(su_cut = 0.7d00)
-
+      parameter(su_cut = 0.9999d00)
+c gaz 121423 modified sucut for irlpd =5 (rlps(S))
+      real*8 su_cut5
+      parameter (su_cut5 = 0.99d0)
 
       integer iz,ndummy,i,irlpd,mi,ieosd,it,ir,j,num_models
       integer :: ireg = 1
@@ -755,6 +756,31 @@ c   gaz 100118 reset model numbers
                
 c     calculate cutoff saturation and head difference
 c     GAZ 8-16-94 added slcut to work with liquid saturation
+c gaz 110419 write out warnings
+          if(rp6f(i).le.rp1f(i)) then  
+           if(iout.ne.0) write(iout,*) 
+     &      '>>> incorrect vg model 3 parameters <<<'
+           if(iptty.ne.0) write(iptty,*) 
+     &      '>>> incorrect vg model 3 parameters <<<'
+          endif
+          if(rp6f(i).ge.rp2f(i)) then  
+           if(iout.ne.0) write(iout,*) 
+     &      '>>> incorrect vg model 3 parameters <<<'
+           if(iptty.ne.0) write(iptty,*) 
+     &      '>>> incorrect vg model 3 parameters <<<'
+          endif   
+       if(rp1f(i).ge.rp2f(i)) then  
+           if(iout.ne.0) write(iout,*) 
+     &      '>>> incorrect vg model 3 parameters <<<'
+           if(iptty.ne.0) write(iptty,*) 
+     &      '>>> incorrect vg model 3 parameters <<<'                       
+       endif 
+       if(rp2f(i).gt.1.0) then  
+           if(iout.ne.0) write(iout,*) 
+     &      '>>> incorrect vg model 3 parameters <<<'
+           if(iptty.ne.0) write(iptty,*) 
+     &      '>>> incorrect vg model 3 parameters <<<'                      
+       endif
                alpha = rp3f(i)
                beta = rp4f(i)
                alamda = 1.0-1.0/beta
@@ -829,7 +855,10 @@ c     get fit at saturated end(star=su_cut)
                   rp2=rp2f(i)
                   rp3=rp3f(i)
                   rp4=rp4f(i)
-                  call  vgrlps(0, sl, star, rp3, rp4, rp1, rp2, 
+c                  call  vgrlps(0, sl, star, rp3, rp4, rp1, rp2, 
+c     2                 tol_l, tol_u, rl, drls, rv, drvs )
+c gaz 120723 made consistent  header
+                   call  vgrlps(0, sl, rp1, rp2, rp4, 
      2                 tol_l, tol_u, rl, drls, rv, drvs )
                endif
                if (irlpt(i) .eq. 9) then
@@ -839,7 +868,8 @@ c     calculate normalisation factor for saturation
             end if
             if (irlpt(i) .eq.21) then
 c    initialization of arrays for Thomeer 
-               call thomeercap(0,0,0,0.,0.,0.,0.,0.,0.,0.,0.)
+               call thomeercap(0,0,0,0.d0,0.d0,
+     &          0.d0,0.d0,0.d0,0.d0,0.d0,0.d0)
 c    calculate cutoff values for cap pressure
                call thomeercap(1,0,i,0.d0,0.d0,
      &              0.d0,0.d0,0.d0,0.d0,0.d0,0.d0)
@@ -1099,13 +1129,12 @@ c                  call vg_regions(1,ireg,mi,su_cut)
      3                 rp10f(it), rp6f(it),su_cut ,
      4                 cp1f(it),cp2f(it),hp, dhp ,ireg    )
                   star = (sl-rp1f(it))/(rp2f(it)-rp1f(it))
-                  call vgrlp(sl, star, rp3, rp4, hmin, hp,
-     2                 dhp, rl, drls, rv, drvs,0)
+                  call vgrlp(sl, star, rp3, rp4, hmin, hp,         
+     2                 dhp, rl, drls, rv, drvs,2)
                   pcp(mi) = 9.8e-3 * hp
                   dpcef(mi) = 9.8e-3 * dhp
                elseif(irpd.eq.8) then
 c rlp(h) and vapor rlp
-c                  call vg_regions(1,ireg,mi,su_cut)
                   call vgcap( sl, rp1, rp2, rp3, rp4, 
      2                 rp7f(it), rp8f(it), rp9f(it),
      3                 rp10f(it), rp6f(it),su_cut ,
@@ -1117,7 +1146,9 @@ c                  call vg_regions(1,ireg,mi,su_cut)
                   dpcef(mi) = 9.8e-3 * dhp
                elseif(irpd.eq.9) then
 c rlp(h) and vapor rlp
-c                  call vg_regions(1,ireg,mi,su_cut)
+c     relative perm functions from Touma and Vauclin (1986)
+c     as reported by Celia and Binney (1992)
+c cap pressure from VG
                   call vgcap( sl, rp1, rp2, rp3, rp4, 
      2                 rp7f(it), rp8f(it), rp9f(it),
      3                 rp10f(it), rp6f(it),su_cut ,
@@ -1135,17 +1166,32 @@ c                  call vg_regions(1,ireg,mi,su_cut)
                   dpcef(mi) = 9.8e-3 * dhp
                elseif(irpd.eq.5) then
 c rlp(S)
-c                  call vg_regions(1,ireg,mi,su_cut)
-                  call vgcap( sl, rp1, rp2, rp3, rp4, 
+                     call vgcap( sl, rp1, rp2, rp3, rp4, 
      2                 rp7f(it), rp8f(it), rp9f(it),
      3                 rp10f(it), rp6f(it), su_cut,
      4                 cp1f(it),cp2f(it),hp, dhp ,ireg    )
-                  star = (sl-rp1f(it))/(rp2f(it)-rp1f(it))
-                  call  vgrlps(2, sl, star, rp3, rp4, rp1, rp2, 
+                  star = (sl-rp1f(it))/(rp2f(it)-rp1f(it))    
+c gaz 120723 fix number of parameters   (compare to rlp_cap call to vgrlps)
+                  call  vgrlps(2, sl, rp1, rp2, rp4, 
      2                 tol_l, tol_u, rl, drls, rv, drvs )
                   pcp(mi) = 9.8e-3 * hp
                   dpcef(mi) = 9.8e-3 * dhp
-               elseif(irpd.eq.4) then
+c gaz 121323 skip over testing  by commenting next line
+                 go to 878
+                  if(sl.le.1.0) then
+                   if(mi.eq.1) write(ierr,*) 'su_cut5', su_cut5
+                   if(mi.eq.1) write(ierr,865)  rp1, rp2, rp3, rp4
+                   if(mi.eq.1) write(ierr,866) 
+                   write(ierr,877) star, sl,rl,rv, hp
+                  else
+                   pause
+                  endif
+865     format(1x,1p,'rlmin',g14.5,t18,'rlmax',g14.5,t36,'entry pres',
+     &         g14.5,t66,' vg n',g14.5)
+866     format(1x,'sl',t16,'star',t32,'rl',t48,'rv',t64,'pcap')
+877     format(1x,1p,g14.5,t16,g14.5,t32,g14.5,t48,g14.5,t64,g14.5)
+878            continue
+               elseif(irpd.eq.4) then                               
 c     
 c     akf-fracture saturated permeability(rp15)
 c     akm-matrix saturated permeability(rp16)
@@ -1330,9 +1376,14 @@ c                        call vg_regions(2,ireg,mi,su_cut)
      3                       rp23f(it), rp16f(it), su_cut,    
      4                       cp3f(it),cp4f(it),hp, dhp, ireg    )
                         star = (sl-rp11f(it))/(rp12f(it)-rp11f(it))
-                        call  vgrlps(2, sl, star, rp13f(it),
-     2                       rp14f(it), rp11f(it), rp12f(it),
-     3                       tol_l, tol_u, rl, drls, rv, drvs)
+                        
+c xhua error6784 The number of actual arguments cannot be greater than the number of dummy arguments
+c                        call  vgrlps(2, sl, star, rp13f(it),    this is original
+c     2                  rp14f(it), rp11f(it), rp12f(it),
+c     3                  tol_l, tol_u, rl, drls, rv, drvs) 
+                        call  vgrlps(2, sl, rp11f(it), rp12f(it),
+     2                  rp14f(it), tol_l, tol_u, rl, drls, rv, drvs)
+                                        
                         permb = akf * porf
                         if(irpd.eq.7) then 
 c calculate fracture term(from Sandia) if necessary
@@ -1347,8 +1398,13 @@ c                        call vg_regions(1,ireg,mi,su_cut)
      3                       rp10f(it), rp6f(it), su_cut,      
      4                       cp1f(it),cp2f(it),hp, dhp, ireg    )
                         star = (sl-rp1f(it))/(rp2f(it)-rp1f(it))
-                        call  vgrlps(2, sl, star, rp3, rp4, rp1, rp2, 
-     2                       tol_l, tol_u, rl, drls, rv, drvs )
+                        
+c xhua error6784 The number of actual arguments cannot be greater than the number of dummy arguments
+c                        call  vgrlps(2, sl, star, rp3, rp4, rp1, rp2,    this is original
+c     2                       tol_l, tol_u, rl, drls, rv, drvs) 
+                        call  vgrlps(2, sl, rp1, rp2, rp4,
+     2                       tol_l, tol_u, rl, drls, rv, drvs)  
+                                          
                         permb = akm * (1. - porf)
                         if(irpd.eq.7) then
 c calculate fracture term(from Sandia) if necessary
@@ -1364,12 +1420,22 @@ c                     call vg_regions(1,ireg,mi,su_cut)
      3                    rp10f(it), rp6f(it), su_cut,      
      4                    cp1f(it),cp2f(it),hp, dhp, ireg    )
                      star = (sl-rp1f(it))/(rp2f(it)-rp1f(it))
-                     call  vgrlps(2, sl, star, rp3, rp4, rp1, rp2, 
-     2                    tol_l, tol_u, rl, drls, rv, drvs )
+                     
+c xhua error6784 The number of actual arguments cannot be greater than the number of dummy arguments
+c                     call  vgrlps(2, sl, star, rp3, rp4, rp1, rp2,    this is original
+c     2                    tol_l, tol_u, rl, drls, rv, drvs) 
+                     call  vgrlps(2, sl, rp1, rp2,rp4,
+     2                    tol_l, tol_u, rl, drls, rv, drvs)    
+                     
                      star = (sl-rp11f(it))/(rp12f(it)-rp11f(it))
-                     call  vgrlps(2, sl, star, rp13f(it),
-     2                    rp14f(it), rp11f(it), rp12f(it),
-     3                    tol_l, tol_u, rl1, drls1, rv1, drvs1)
+                     
+c xhua error6784 The number of actual arguments cannot be greater than the number of dummy arguments
+c                    call  vgrlps(2, sl, star, rp13f(it),      this is original
+c     2                   rp14f(it), rp11f(it), rp12f(it),
+c     3                   tol_l, tol_u, rl, drls, rv, drvs) 
+                     call  vgrlps(2, sl, rp11f(it), rp12f(it),
+     2                    rp14f(it), tol_l, tol_u, rl, drls, rv, drvs)  
+                     
                      permb = akf * porf + akm * (1. - porf)
                      rl=(akf*rl1*porf+akm*rl*(1.0-porf))/permb
                      drls=(akf*drls1*porf+akm*drls*(1.0-porf))/permb

@@ -29,6 +29,9 @@ c     only good for 2D or 3D models
       real*8 t_ramp,ratio_frac,ratio
       real*8 temp_node,temp_low,temp_high
       real*8 DeltaPoros, DeltaHeight
+c xhua error#6633: The type of the actual argument differs from the type of the dummy argument.
+c original t(:) was defined in "comdi.f" as"real*8,allocatable :: t(:)", but should be integar in DeltaHeight.f
+      integer, allocatable ::  tt(:)
       
 c     
 c     calculate components of volume strain
@@ -46,7 +49,7 @@ c     2D x-y version  (y can be vertical)
          t_ramp = spm2f(iispmd)
          temp_low = -0.5*t_ramp
          temp_high = 0.5*t_ramp 
-         temp_node = t(i) 
+         temp_node = tt(i) 
          ratio_frac =  (temp_node-temp_low)/t_ramp
 c     
          ipchk = 0
@@ -72,7 +75,7 @@ c
          t_ramp = spm2f(iispmd)
          temp_low = -0.5*t_ramp
          temp_high = 0.5*t_ramp 
-         temp_node = t(i) 
+         temp_node = tt(i) 
          ratio_frac =  (temp_node-temp_low)/t_ramp
 c     
          ipchk = 0
@@ -97,7 +100,7 @@ c          ps(i) = DeltaPoros(t(i),psini(i))
 c
 c get height of cell
 c   
-          dzrg_new(i) = DeltaHeight(t(i),dzrg(i),psini(i))
+          dzrg_new(i) = DeltaHeight(tt(i),dzrg(i),psini(i))
       return
 
       end

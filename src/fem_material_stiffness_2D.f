@@ -24,7 +24,9 @@
       use comfem
 
       implicit none
-      real*8,  dimension(3,3)      :: D
+c xhua error#7983 The storage extent of the dummy argument exceeds that of the actual argument
+c      real*8,  dimension(3,3)      :: D    this is original
+      real*8,  dimension(6,6)      :: D 
       integer                      :: i, j, itmp
       integer                      :: iModel, k
       real *8                      :: e1bar, e2bar, e3bar

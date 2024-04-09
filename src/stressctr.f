@@ -2556,11 +2556,20 @@ c
                      strength = strength_out
                      pp_fac=pp_fac_out
                   endif
-                  call principal_incremental_stress_3D(ishear,alambda,
-     &                 eigenvec,stress_factor_initial)
+c xhua error#6634 #6784 The shape matching rules of actual arguments and dummy arguments have been violated   
+c                  call principal_incremental_stress_3D(ishear,alambda      this is original
+c     &                    ,eigenvec,stress_factor_initial)
+                  call principal_incremental_stress_3D(ishear,
+     &            stress_factor_initial)
+                  
 c                  call principal_stress_3D(ishear,alambda,eigenvec)
+                  
+c xhua error#6634 #6784 The shape matching rules of actual arguments and dummy arguments have been violated 
+c                  call max_excess_shear(ishear,friction,strength,         this is original
+c     &                 alambda,pp_fac,stress_factor_initial,eigenvec)              
                   call max_excess_shear(ishear,friction,strength,
-     &                 alambda,pp_fac,stress_factor_initial,eigenvec)
+     &                 pp_fac,stress_factor_initial)                 
+                  
                   shear_angle(md) = shear_angle(md)*180./pi
                enddo
             endif
@@ -2577,7 +2586,9 @@ c                  call principal_stress_3D(ishear,alambda,eigenvec)
                md     =  nskw(i)               
                if(flag_principal.eq.1) then
 c     s kelkar nov 5,2010 output plane of max excess shear
-                  call principal_stress_3D(md,alambda,eigenvec)
+c xhua error#6634 #6784 The shape matching rules of actual arguments and dummy arguments have been violated 
+c                  call principal_stress_3D(md,alambda,eigenvec)   this is original
+                  call principal_stress_3D(md)
                   eigenvec_deg(1)=dacos(eigenvec(3,3))*180./pi   
                   eigenvec_deg(2)=dacos(eigenvec(1,3))*180./pi   
                   eigenvec_deg(3)=dacos(eigenvec(1,1))*180./pi   
@@ -2698,11 +2709,19 @@ c
                      strength = strength_out
                      pp_fac = pp_fac_out
                   endif
-                  call principal_incremental_stress_3D(ishear,alambda,
-     &                 eigenvec,stress_factor_initial)
+c xhua error#6634 #6784 The shape matching rules of actual arguments and dummy arguments have been violated 
+c                  call principal_incremental_stress_3D(ishear,alambda      this is original
+c     &                    ,eigenvec,stress_factor_initial)
+                  call principal_incremental_stress_3D(ishear,
+     &                     stress_factor_initial)                  
+                                 
 c                  call principal_stress_3D(ishear,alambda,eigenvec)
+                  
+c xhua error#6634 #6784 The shape matching rules of actual arguments and dummy arguments have been violated                 
+c                  call max_excess_shear(ishear,friction,strength,         this is original
+c     &                 alambda,pp_fac,stress_factor_initial,eigenvec)              
                   call max_excess_shear(ishear,friction,strength,
-     &                 alambda,pp_fac,stress_factor_initial,eigenvec)
+     &                 pp_fac,stress_factor_initial)                    
                   shear_angle(ishear) = shear_angle(ishear)*180./pi
                enddo
             endif                 
@@ -2732,7 +2751,9 @@ c                  call principal_stress_3D(ishear,alambda,eigenvec)
                
                if(flag_principal.eq.1) then
 c     s kelkar nov 5,2010 output plane of max excess shear
-                  call principal_stress_3D(md,alambda,eigenvec)
+c xhua error#6634 #6784 The shape matching rules of actual arguments and dummy arguments have been violated 
+c                  call principal_stress_3D(md,alambda,eigenvec)   this is original
+                  call principal_stress_3D(md)
                   eigenvec_deg(1)=dacos(eigenvec(3,3))*180./pi   
                   eigenvec_deg(2)=dacos(eigenvec(1,3))*180./pi   
                   eigenvec_deg(3)=dacos(eigenvec(1,1))*180./pi   
@@ -2764,12 +2785,22 @@ c     s kelkar nov 5,2010 output plane of max excess shear
                      friction = friction_out
                      strength = strength_out
                      pp_fac=pp_fac_out
-                  endif
-                  call principal_incremental_stress_3D(md,alambda,
-     &                 eigenvec,stress_factor_initial)
-c                  call principal_stress_3D(md,alambda,eigenvec)
-                  call max_excess_shear(md,friction,strength,alambda,
-     &                 pp_fac,stress_factor_initial,eigenvec)
+                  endif             
+                  
+c xhua error#6634 #6784 The shape matching rules of actual arguments and dummy arguments have been violated 
+c                  call principal_incremental_stress_3D(md,alambda      this is original
+c     &                    ,eigenvec,stress_factor_initial)
+                  call principal_incremental_stress_3D(md,
+     &                     stress_factor_initial)                  
+                                 
+c                  call principal_stress_3D(ishear,alambda,eigenvec)
+                  
+c xhua error#6634 #6784 The shape matching rules of actual arguments and dummy arguments have been violated                 
+c                  call max_excess_shear(md,friction,strength,         this is original
+c     &                 alambda,pp_fac,stress_factor_initial,eigenvec)              
+                  call max_excess_shear(md,friction,strength,
+     &                 pp_fac,stress_factor_initial)            
+                  
                   shear_angle = shear_angle*180./pi
                   if(ntty.eq.2) write(iout,8120)  
      &                 md, str_x(md), str_y(md), str_z(md), 

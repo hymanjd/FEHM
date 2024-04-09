@@ -728,7 +728,7 @@ C***********************************************************************
       implicit none
 
       real*8 al, alen1, alen2, alen3, det, difvol, dm(4,4), sumu
-      real*8 tol, tp, tp1, tp2, tp3, tp4, vlorth, volest, volu
+      real*8 tol, tp, tp1, tp2, tp3, tp4, vlorth, volest, volu   
       real*8 vp, xie, xnelu, yie, ynelu, zero_d, zie, znelu 
       real*8 x1, x2, x3, x12, x13, x14, x15, x23, x34, x37, x45, x46 
       real*8 x56, x58, x67, x78, y1, y2, y3, y12, y13, y14, y15, y23 
@@ -760,7 +760,12 @@ c using storage for a matrix
       integer, allocatable :: ineluf(:)
       integer, allocatable :: nopdum(:,:)
       integer, allocatable :: noodum(:,:)
-      integer, allocatable :: iplace(:)        
+      integer, allocatable :: iplace(:)   
+      
+c xhua define temp arrary      
+      real*8, allocatable :: volest_tmp(:), x12_tmp(:), x13_tmp(:)
+      real*8, allocatable :: x14_tmp(:),y12_tmp(:),y13_tmp(:),y14_tmp(:)
+      integer, allocatable :: neighbors_tmp(:)
 
       data korth / 1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 0, 0,
      *             0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 1,
@@ -1004,9 +1009,18 @@ c     prisms always are non orthogonal
                enddo
 c     procedure for 3 node triangles in 3-d
 c     calculate volume
+c xhua error#8284 If the actual argument is scalar, the dummy argument shall be scalar
+               volest_tmp(1)=volest
+               x12_tmp(1)=x12
+               x13_tmp(1)=x13
+               x14_tmp(1)=x14
+               y12_tmp(1)=y12
+               y13_tmp(1)=y13
+               y14_tmp(1)=y14
                call area2d_tri(1,dm(1,1),dm(1,2),dm(1,3),
      &              dm(2,1),dm(2,2),dm(2,3),dm(3,1),dm(3,2),dm(3,3),    
-     &              volest,x12,x13,x14,y12,y13,y14)                
+     &              volest_tmp(1),x12_tmp(1),x13_tmp(1),
+     &              x14_tmp(1),y12_tmp(1),y13_tmp(1),y14_tmp(1))      
                vole(ie) = volest
 c     triangles always are non orthogonal
                iorth(ie) = 0
@@ -1474,7 +1488,9 @@ c
 c     
 c     call md_nodes to break connections for those nodes
 c     
-      call md_nodes(2,0,0)                            
+c xhua error#8284 If the actual argument is scalar, the dummy argument shall be scalar 
+      neighbors_tmp(1) = 0
+      call md_nodes(2,neighbors_tmp,0)                            
 c     
       deallocate(ncon,vole,iorth,nf)
 c     
