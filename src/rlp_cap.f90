@@ -418,7 +418,9 @@ subroutine water_air_phase(ieosd,k)
   implicit none      	
   integer phase(3),k,mi,it,ieosd
   real*8 sw
-  if (ieosd.eq.1) then
+  if(ico2.lt.0) then
+    k=25  ! water/air  
+  else if (ieosd.eq.1) then
      !     single phase (water)
      k=2
   else if (ieosd .eq. 3) then

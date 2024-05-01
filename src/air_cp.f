@@ -194,15 +194,16 @@ C**********************************************************************
 c gaz 121418
 c need to add solubility as function of temperature      
       subroutine air_sol(tl,pl,pcl,xnl,dxnlp,dxnlpc,dxnlt)
-c calculate air solubility in water      
+c calculate air solubility in water 
+       use com_prop_data, only :   xnl_max  
+       implicit none
        real*8 tl,pl,pcl,xnl,dxnlp,dxnlpc,dxnlt, alpha0
-       real*8 xtol,alpha, dalpca,dalphat,tsolmax, alpha_tol
-       real*8 xnl_max
-       
+       real*8 xtol,alpha, dalpca,dalphat,tsolmax, alpha_tol       
        integer imod_sol
-        parameter (imod_sol = 0)
-        parameter (alpha0 = 1.6111d-04, xnl_max=0.1)     
-        parameter(xtol=1.d-16, tsolmax = 300., alpha_tol = 1.d-9)        
+        parameter (imod_sol = 1)
+        parameter (alpha0 = 1.6111d-04)     
+        parameter(xtol=1.d-16, tsolmax = 300., alpha_tol = 1.d-9)  
+        xnl_max=0.1      
 c gaz 121618 disable temperature dependant Henry's law   
         if(imod_sol.ne.0) then           
          if(tl.le.tsolmax) then

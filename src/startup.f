@@ -429,7 +429,10 @@ c      rho1grav = crl(1,1)*(9.81d-6)
 c      rho1grav = 997.*9.81d-6
 c**** Deallocate printout information array for variable porosity model
 c**** if allocated and not a variable porosity problem
-      if (iporos .ne. -4) then
+cDEC$ FIXEDFORMLINESIZE:132      
+c gaz debug 121319     
+      j = sk(1)+ieos(1)+ ps(1)+psini(1)+pci(1)
+       if (iporos .ne. -4) then
          if (allocated(nskw3)) deallocate(nskw3)
       endif
 c
@@ -579,7 +582,11 @@ c**** set permeabilities = 0 for porosity = 0.0 ****
       mink = neq - neq_active
 
 c**** complete element information ****
+c gaz 050822,060822 need to save elements for contour plotting (iogeo or iogrid)
+      call elem_geo_ctr(0)
+      call elem_geo_ctr(1)
 !      if(contim.ge.0) then
+c gaz 050721 move contr(0) after gdkm  connections created
          call contr (0)
 !      else
 !         call contr_days (0)
@@ -664,7 +671,8 @@ c gaz 122311 moved lower
 c         call area_length_calc(3) 
 c gaz 051616 change calls for gdkm 
 c need drxg,dryg,drzg here 
-c gaz 091118 removed this line          
+c gaz 091118 removed this line   
+c gaz 010423 removed next line (caused tensor perm test to fail)
 c          i = sx(1,1)
           
           if (gdkm_flag .ne. 0.and.gdkm_flag .le. 3) 
@@ -866,13 +874,7 @@ c new placement of peint
 
 c added new feature -- set initial time if requested in time macro
        if (irsttime.ne.0) days=rsttime
-c gaz 092111 have moved  above
-c      if (iread .le. 0 .and. (tin0 .gt. 0.0 .or. tin1.gt.0.0))
-c    &     call peint
-c      if (iread.le.0 .and. igrad. ne.0) call gradctr(1)
-c     gaz 9-26-04
-      if (igrad. ne.0) call gradctr(1)
-      if (iconv. ne.0) call convctr(1)
+
       if (isubwd. ne.0) call wellimped_ctr(1)
 c
 c check that source terms are ok on restart for wellbore model
@@ -1059,6 +1061,7 @@ c
 c       
 c call reordering algorithm here
 c
+c gaz 061222 save element information
       call renum(1)
 c
       if(irun.eq.1) then
@@ -1248,25 +1251,19 @@ c     write out new size for b matrix
  6010 format(1x,'storage available for b matrix resized to ',
      &     i10, '<<<<<<') 
       
-c     Initialize eos values as necessary (for air)
-c     first set phase state for wtsi
-c      call wtsictr(-1)           
+c gaz 052323
       if (ico2.lt.0.and.ice.eq.0) then
          call airctr(-1,0)
-!     else if (ico2.lt.0.and.ice.ne.0) then
-!        call icectr(-1,0)
       endif
 c     Calculate rho1grav
-      if(ico2.lt.0) then
-         rho1grav = crl(1,1)*(9.81d-6)
-      else
+c        if(ico2.lt.0) then
+c         rho1grav = crl(1,1)*(9.81d-6)
+c        else
          rho1grav = rol0*9.81d-6
-      endif
-c      rho1grav = 997.*9.81d-6
-
-c     Moved calls to airctr for head option to below the iflg = -1 call
-c if head input has been used,convert to pressures
-c
+         if(ico2.lt.0) rho1grav = crl(1,1)*(9.81d-6)
+c        endif                                                                                                F
+      if (igrad. ne.0) call gradctr(1)
+      if (iconv. ne.0) call convctr(1)
 c      if(ihead.ne.0.or.ichead.ne.0) then
 c gaz 083119 this could possibly cause problems if ichead does more that I think  <<<<
        if(ihead.ne.0) then
@@ -1428,6 +1425,15 @@ c gaz debug 090113
 c**** insure anl = anlo for cden to get density right for firsat timestep****
        call concen(6,0)
 c**** determine initial variable state ****
+c gaz 070521 initialize count of calls to eos properties (AWH only)
+       if(ico2.gt.0) then
+        call fluid_props_control(-1, 0, 0, 'h2o      ', 'all      ', '         ')  
+       endif
+c gaz 111223 henry's law  isothermal  allocate memory
+       if(ico2.lt.0) then
+        call solubility_isothermal(0,0)
+        call phase_change_mass_conv(0,0,0)
+       endif
 c gaz 10-18-2001     call sice (1)
       if(compute_flow .or. iccen .eq. 1) then
          if(ice.eq.0) then
@@ -1470,9 +1476,10 @@ c     id mobile methane and water
       else
          if(ico2.lt.0.and.ice.eq.0) then
 c     air water problem
+c gaz 111119 changed crl(4,1) to pref             
             do i = 1, n0
                rolf(i)=crl(1,1)*
-     2              (1.0+crl(3,1)*(phi(i)-crl(4,1)))
+     2              (1.0+crl(3,1)*(phi(i)-pref))
             end do
          else if(ico2.lt.0.and.ice.ne.0) then
 c gaz 10-18-2001 following used ase dummy parameters
@@ -1515,7 +1522,8 @@ c**** calculate initial mass and energy ****
             endif
 	    if (ifree .ne. 0) then
                so(i) = rlxyf(i)
-            else if (irdof.ne.13) then
+c gaz 110123
+            else if (irdof.ne.13.and.idoff.ne.-1) then
                so (i) = s(i)
             end if
             denh (i) = deni (i) * dtot
@@ -1571,9 +1579,14 @@ c
        neq_primary = neq_gdkm
       endif
 c
+c gaz 050721 moved material contour file generation  
+c gaz 041822 moved call contr(0) up again      
+c          call contr (0)
 !      if(contim.ge.0) then
          call contr (-1)
          call contr ( 1)
+c gaz 061022 deallocate elem_geo
+         call elem_geo_ctr(-1)
 c gaz debug 021114
 c output map of active nodes
          call active_nodes_ctr(3)
@@ -1583,8 +1596,17 @@ c output map of active nodes
 !      endif
 c 
 c**** initalize concentration ****
-      if (iccen .ne. 0)  call concen (-1,0)
-
+      if (iccen .ne. 0)  then
+c gaz 050820 allocate and initialize 
+c pure water rolf and dil here
+       if(cden) then
+             if(.not.allocated(rolf_pure)) allocate(rolf_pure(n0)) 
+             if(.not.allocated(dil_pure)) allocate(dil_pure(n0)) 
+             rolf_pure(1:n0) = rolf(1:n0)
+             dil_pure(1:n0) = dil(1:n0)
+       endif      
+       call concen (-1,0)
+      endif
       call pest(1)
 
 ! Moved history file setup below zone volume calculations

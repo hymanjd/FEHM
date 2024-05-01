@@ -331,7 +331,11 @@ c            write(isave, 6002)  (max(to(mi),tolw),   mi=1,n )
          end if
          if (write_sat .and. irdof .ne. 13 .and. ihead .eq. 0) then
             write(isave, '(a11)') 'saturation '
-            write(isave, 6002)  (max(s(mi),tolw),    mi=1,n )
+            if(idoff.eq.-1) then
+             write(isave, 6002)  (1.0d0,    mi=1,n )
+            else
+             write(isave, 6002)  (max(s(mi),tolw),    mi=1,n )
+            endif
          else
          end if
          if (write_pres) then
