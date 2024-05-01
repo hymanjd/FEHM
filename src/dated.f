@@ -244,7 +244,7 @@ c      write(jtimex,'(i2.2,1h:,i2.2,1h:,i2.2)')  jjtime
 ! Code version identifier
 c gaz 021521 allow identifier to be read in      
       if(idfehm.eq.0) then
-       verno = "FEHM3.50_VER1ab_021324"
+       verno = "FEHM3.6_VER2"
       else
        verno(1:30) = verno_fehmid(1:30)
       endif

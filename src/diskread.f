@@ -199,6 +199,8 @@
       use comsi
       use comxi
       use davidi
+c gaz 031124      
+      use com_prop_data, only : ihenryiso
       implicit none
 
 c      real*8 pl, tl, dum1, dumb, dumc(9)
@@ -233,6 +235,12 @@ c      real*8 pl, tl, dum1, dumb, dumc(9)
       logical, dimension (2) :: read_strxy = .FALSE.
       logical, dimension (2) :: read_strxz = .FALSE.
       logical, dimension (2) :: read_stryz = .FALSE.
+c gaz 040924
+      if(.not.allocated(read_mfrac_iso)) then
+       allocate(read_mfrac_iso(2))
+       read_mfrac_iso(1) = .FALSE.
+       read_mfrac_iso(2) = .FALSE.
+      endif
       residual_stress = .FALSE.
 
       mass_read = .FALSE.
@@ -268,6 +276,10 @@ c read other variables depending on the physics
             else
                if (ico2 .ge. 0) read_temp(1) = .TRUE.
             endif
+c gaz 031924 
+            if(ihenryiso.ne.0) then
+                read_mfrac_iso(1) = .true.   
+            endif    
 c              read_pres(1) = .TRUE.
 c              pres_read = .TRUE.
                if (irdof .ne. 13) read_sat(1)  = .TRUE.
@@ -467,12 +479,17 @@ c
                end if
                if (read_sat(1) .and. irdof .ne. 13) then
                   read(iread ,*)  ( s   (mi) , mi=1,ncount )
-                  read_sat(2) = .TRUE.
+                  read_sat(2) = .TRUE.                           
                else
                   read (iread, *) ( dummyreal, mi = 1,ncount )
                   if (iout .ne. 0) write (iout, 400) 'saturations'
                   if (iptty .ne. 0) write (iptty, 400) 'saturations'
                end if
+c gaz 031924                  
+              if (read_mfrac_iso(1) .and. irdof .ne. 13) then
+                  read(iread ,*)  (frac_gas_iso(mi), mi=1,ncount )
+                  read_mfrac_iso(2) = .TRUE.  
+               endif   
                if (read_pres(1) .or. read_co2(1)) then
                   read(iread ,*)  ( phi (mi) , mi=1,ncount )
                   pres_read = .TRUE.
@@ -644,6 +661,15 @@ c            if (modneq .ne. 0 .or. modneq_primary .ne. 0) goto 2000
                      if (iout .ne. 0) write (iout, 400) 'saturations'
                      if (iptty .ne. 0) write (iptty, 400) 'saturations'
                   end if
+               case ('mfra', 'mfr ')
+                  if (read_mfrac_iso(1) .and. irdof .ne. 13) then
+                     read (iread, *) (frac_gas_iso(mi), mi = 1,ncount)
+                     read_mfrac_iso(2) = .TRUE.
+                  else
+                     read (iread, *) ( dummyreal, mi = 1,ncount )
+                     if (iout .ne. 0) write (iout, 400) 'saturations'
+                     if (iptty .ne. 0) write (iptty, 400) 'saturations'
+                  end if                  
                case ('gasp', 'gas ')
                   if (read_gasp(1)) then
                      read (iread, *) ( pci(mi), mi = 1,ncount )

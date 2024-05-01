@@ -482,7 +482,8 @@ C***********************************************************************
       use comdti
 c gaz debug 042120      
       use comfi, only : pci, imod_sol, alpha0, idiff_iso, q_gas,
-     &                 q_gas_tot                                                                
+     &                 q_gas_tot    
+      use com_prop_data, only : ihenryiso
       use comevap, only : evaporation_flag
       use comflow, only: flag_heat_out
       use compart
@@ -1411,7 +1412,11 @@ c**** pressure and temperature dependent porosity and permeability ****
 
       else if (macro .eq. 'pres') then
 c**** pressure information ****
-         call inpres
+         if(ihenryiso.eq.0)then
+          call inpres
+         else
+          call inpres_solubility
+         endif
 
       else if (macro .eq. 'ptrk') then
 c**** particle tracking ****
