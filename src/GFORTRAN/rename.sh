@@ -1,8 +1,8 @@
 # New files with comment
 # rename gaz names to master names
+# Files recieved March 14 2023
 #
-# NEW FILES
-# rename to remove gaz version numbers
+# NEW FILES do not rename
 # air_properties_new.f90
 # co2_properties_new.f90
 # co2wh_properties_new.f90
@@ -10,6 +10,13 @@
 # commass_AWH.f
 # interpolate_2b.f90
 # interpolate_2c.f90
+# Note relation of file name to module name
+#   interpolate.f90:       module property_interpolate
+#   interpolate_2a.f90:    module property_interpolate_1
+#   interpolate_2b.f90:    module property_interpolate_2
+#   interpolate_2c.f90:    module property_interpolate_3
+
+#  remove version tags from new files
 mv Sub_FEHM_tec_to_vtk_version_2o.f Sub_FEHM_tec_to_vtk.f
 mv com_prop_data_2b.f com_prop_data.f
 mv explicit_phase_update_a1.f explicit_phase_update.f
@@ -81,7 +88,6 @@ mv innode_2c.f innode.f
 mv inpres_2b.f inpres.f
 mv input_2g.f input.f
 mv inrlp_2b.f90 inrlp.f90
-mv interpolate_2a.f90 interpolate_2.f90
 mv model_setup_2d.f model_setup.f
 mv normal_dof_2b.f normal_dof.f
 mv nr_stop_ctr_2f.f nr_stop_ctr.f
