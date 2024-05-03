@@ -19,8 +19,6 @@ mv avs_io_2d.f avs_io.f
 mv bcon_2a.f bcon.f
 mv bnswer_2d.f bnswer.f
 mv bnswer_part_2d.f bnswer_part.f
-mv brooks_corey_cap3.f brooks_corey_cap.f
-mv brooks_corey_rlp3.f brooks_corey_rlp.f
 mv check_rlp_2c.f check_rlp.f
 mv co2ctr_2w.f co2ctr.f
 mv comai_2h.f comai.f
