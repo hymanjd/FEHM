@@ -1415,7 +1415,7 @@ c**** pressure information ****
          if(ihenryiso.eq.0)then
           call inpres
          else
-          call inpres_solubility
+          call inpres_w_solubility
          endif
 
       else if (macro .eq. 'ptrk') then

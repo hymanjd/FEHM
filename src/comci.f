@@ -340,5 +340,6 @@ c gaz debug 090511
       real*8, allocatable  ::   deni_ch(:) 
       real*8, allocatable  ::   denpci_ch(:) 
       integer, allocatable  ::   ieos_bal(:) 
+      
 
       end module comci

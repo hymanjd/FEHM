@@ -224,7 +224,6 @@
 !**********************************************************************
 
       real*8, allocatable ::  cnlf(:)
-      real*8, allocatable ::  cnlof(:)
       real*8, allocatable ::  cnvf(:) 
       real*8, allocatable ::  dcc(:) 
       real*8, allocatable ::  dce(:) 
@@ -305,6 +304,5 @@ c gaz 030223, 120223
       real*8 bpt(3),bpt0(3),a33t(3,3),a33ti(3,3),del(3)
 c gaz032623
       logical  ts_chng
-      logical, allocatable :: read_mfrac_iso(:) 
       end module comfi
  

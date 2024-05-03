@@ -924,8 +924,11 @@ c     ***** COMMON Block co2 *****
          allocate(pci(1),pcio(1))
          n4 = 1
       end if
-      allocate(cnlf(n4),cnvf(n4),dcc(n4),dce(n4))
-      allocate(dclcf(n4),dclef(n4),dclf(n4),dcp(n4))
+c gaz 040624 allow allocation for cnlf,dclf,dclef size = n0
+c      allocate(cnlf(n4),cnvf(n4),dcc(n4),dce(n4))
+c gaz 042024 added cnlof(n0)
+      allocate(cnlf(n0),cnlof(n0),cnvf(n4),dcc(n4),dce(n4))
+      allocate(dclcf(n4),dclef(n0),dclf(n0),dcp(n4))
       allocate(dcqc(n4),dcqh(n4),dcvcf(n4),dcvef(n4))
       allocate(dcvf(n4),dec(n4),delcf(n4),denpch(n4))
       allocate(denpci(n4),denpcj(n4),deqc(n4),devcf(n4))

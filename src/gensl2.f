@@ -391,8 +391,6 @@ c
       use comwt
       use comriv
       use comwellphys
-c gaz 040724
-      use com_prop_data, only : ihenryiso, ctest, xnl_ngas, xnl_max 
       implicit none
 
       real*8, allocatable :: sto5(:,:)
@@ -527,9 +525,6 @@ c do we need to make sure this is a wtsi node?
                   a(nelmdg(id)-neqp1+nmat(1))=sx1(id)
                   bp(id+nrhs(1))=0.0d00
                endif
-            else if(ihenryiso.ne.0) then
-               call geneq2_sol(id)
-               call add_accumulation(id)
             else
                call geneq2(id)
                call add_accumulation(id)

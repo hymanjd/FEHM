@@ -458,6 +458,7 @@ C***********************************************************************
       use comevap, only : evaporation_flag
 c gaz 040621 added qtotin below      
       use comfi, only : qtc, qtotc, qtotin, pci, pcio, idiff_iso
+     &   ,cnlf,cnlof
       use comflow, only : a_axy
       use comii, only : pmin,pmax,tmin,tmax,fluid,
      &  tmin_air_tabl,tmax_air_tabl,pmin_air_tabl,pmax_air_tabl,
@@ -476,6 +477,7 @@ c gaz 040621 added qtotin below
       use davidi
       use comfem, only : edgeNum1, NodeElems, ifem, flag_element_perm
       use comfem, only : fem_strain, conv_strain, conv_pstrain  
+      use com_prop_data, only : xnl_ngas, ihenryiso
       use property_interpolate
 c gaz 121117 added new interpolation for water      
       use property_interpolate_1
@@ -1120,8 +1122,8 @@ c**** if heat and mass transfer solution is enabled ****
                dtotdm = dtot
                tassem = tyming(caz)                         
 c**** form equations, calculate corrections. ****
-               irestart_ts = 0
-               if(ipara.eq.0) then
+               irestart_ts = 0 
+                 if(ipara.eq.0) then
                   call bnswer
                else
                   call bnswer_part
@@ -1292,7 +1294,7 @@ c gaz 122121 moved phase count ro subroutine
 
 c
 c gaz 120423 check  for gas diffusion boundary
-               if(idiff_iso.ne.0) call solubility_isothermal(2,0)
+               if(idiff_iso.ne.0) call   solubility_isothermal(2,0)
 c call thermo because the solver is overwriting the deni and denei arrays
 c    
                if(istrs_coupl.gt.0.and.ico2.eq.0) then
@@ -1412,6 +1414,8 @@ c update peaceman term for wellbore pressure
                do ja = 1,n
                   to (ja) = t(ja)
                   pho (ja) = phi(ja)
+c gaz 042024 
+                 if(ihenryiso.ne.0)  cnlof(ja) = cnlf(ja)
                enddo
 c**** update co2 arrays ****
                call co2ctr (3)

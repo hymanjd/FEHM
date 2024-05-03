@@ -191,6 +191,7 @@ C***********************************************************************
       use comai
       use comco2
       use davidi
+      use com_prop_data, only : ihenryiso
       implicit none
 c gaz 121718   0923219 h2o_crit   moved to comai
 c      real*8 pcrit_h2o, tcrit_h2o
@@ -209,7 +210,18 @@ c               s  (i) =  so (i)
             deni(i) = 0.0
          enddo
          return
-      else
+      else if(ihenryiso.ne.0) then
+c gaz 042024 reset for isothermal ngas with solubility
+          do id = 1, neq
+            i      =  id+ndum
+            phi(i) =  pho(i)
+            s  (i) =  so (i)
+            cnlf(i) =  cnlof(i)
+            deni(i) = 0.0
+            denei(i) = 0.0
+         end do
+         return
+      else 
          do id = 1, neq
             i      =  id+ndum
             phi(i) =  pho(i)

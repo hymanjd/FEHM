@@ -1,4 +1,4 @@
-      subroutine vgrlps(iflg, sl,  sl1, sl2, alamda,tol_l,
+      subroutine vgrlps(iflg, sl,  sl1, sl2, beta,tol_l,
      2     tol_u, rl, drls, rv, drvs )
 !***********************************************************************
 !  Copyright, 2004,  The  Regents  of the  University of California.
@@ -275,7 +275,7 @@ c calculate interpolated values
        if(star.gt.tol_l.and.star.lt.1.0-tol_u) then
  
 c     calculate the relative permeability
-c          alamda = 1.0-1.0/beta
+          alamda = 1.0-1.0/beta
           alamdai = 1.0/alamda
           term1 = sqrt(star)
           term2 = star**alamdai
@@ -302,7 +302,7 @@ c          alamda = 1.0-1.0/beta
 c     upper residual cutoff
        else if(star.ge.1.0-tol_u.and.star.lt.1.0) then
           star1= 1.0-tol_u
-c          alamda = 1.0-1.0/beta
+          alamda = 1.0-1.0/beta
           alamdai = 1.0/alamda
           term1 = sqrt(star1)
           term2 = star1**alamdai
@@ -337,7 +337,7 @@ c rv has own vg function
        dstarm1 = -dstar
        if(starm1.gt.tol_l.and.starm1.lt.1.0-tol_u) then
 c     calculate the relative permeability
-c          alamda = 1.0-1.0/beta
+          alamda = 1.0-1.0/beta
           alamdai = 1.0/alamda
           alamda2 = 2.0*alamda
           term1 = sqrt(starm1)
@@ -355,7 +355,7 @@ c          alamda = 1.0-1.0/beta
        else if(starm1.gt.0.0.and.starm1.le.tol_l) then
 c     lower residual cutoff
           star1= tol_l
-c          alamda = 1.0-1.0/beta
+          alamda = 1.0-1.0/beta
           alamdai = 1.0/alamda
           alamda2 = 2.0*alamda
           term1 = sqrt(star1)
@@ -367,7 +367,7 @@ c          alamda = 1.0-1.0/beta
 c     upper residual cutoff
        else if(starm1.ge.1.0-tol_u.and.starm1.lt.1.0) then
           star1= 1.0-tol_u
-c          alamda = 1.0-1.0/beta
+          alamda = 1.0-1.0/beta
           alamdai = 1.0/alamda
           alamda2 = 2.0*alamda
           term1 = sqrt(star1)

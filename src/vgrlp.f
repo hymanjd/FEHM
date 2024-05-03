@@ -274,10 +274,9 @@ c
 c
 c check for minumum capillary pressure
 c
-c
 c gaz debug 020824
-c      if(iflg.le.1) then
-      if(iflg.eq.2) then
+      if(iflg.le.1) then
+c      if(iflg.eq.2) then
          if (hp .lt. hmin ) hp=hmin
          if(sl .gt.0.0.and.sl .lt.1.00) then
 c     calculate the relative permeability

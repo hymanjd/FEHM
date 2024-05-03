@@ -594,8 +594,7 @@ c        if(l.gt.0) then
           call phase_change_mass_conv(1,mi,mi)
           call solubility_isothermal(1,mi)
          endif
-c gaz 040624 invoke  only for  ihenryiso ne 0
-          call solubility_isothermal(1,mi)
+c gaz 04064 invoke  only for  ihenryiso ne 0
           if(sl.lt.1.0d0) then
            xnl    = xnl_ngas(mi,1)
            dxnlp  = xnl_ngas(mi,2)
@@ -1194,14 +1193,11 @@ c esk(mi)   specified mass fraction
               permsd=abs(wellim(mi))
               pflowd = pflow(mi)
               sflux = esk(mi)
-c gaz 041524 added sat = 1 constraint
-              qwdis = permsd*(pl-pflowd) 
-c removed 
-c     &       + permsd*(sl-1.0)
+              qwdis = permsd*(pl-pflowd)
               dqwp  = permsd 
               dqws = 0.0d0
               qadis = permsd*(cnlf(mi)-sflux)
-              dqas = permsd*dclef(mi) 
+              dqas = permsd*dclef(mi)
               dqap = permsd*dclf(mi)
          else if(kq.eq.2) then
             qwdis = qc(mi)
@@ -1547,17 +1543,13 @@ c gaz 111523 test
           alpha_iso = alpha_h2
         endif 
 c gaz 111723 gas pressure Pg = phi(mid) + pcap(mid) << depends on saturation
-c        p_air = pcp(mid) + phi(mid)
-c gaz 042024 gas pressure Pg = phi(mid)
-c        p_air = pcp(mid) + phi(mid)
-c        dp_air_s  = dpcef(mid) 
-        p_air = phi(mid)
+        p_air = pcp(mid) + phi(mid)
         dp_air_p =1.0d0
-        dp_air_s  = 0.0d0
+        dp_air_s  = dpcef(mid) 
           if(s(mid).lt.1.d00) then
            xnl = alpha_iso*p_air + alpha_tol
            dxnlp =alpha_iso*dp_air_p  
-           dxnlt =0.0d0
+           dxnlt =0.0
            dxnls= alpha_iso*dp_air_s
           else
 c max xnl 
@@ -1600,13 +1592,10 @@ c undergoing phase change
       use comrxni
       use comwt
       use davidi
-      use com_prop_data, only : xnl_ngas, xnl_max
       implicit none
       integer iflg, mi1, mi2, ii, i, i1, i2, nr1, nr2
       integer iphase_old, iphase_new
       real*8 tol_frac, frac_gas, gas_mass, liq_mass, phi_old, sl
-c gaz 041724
-      real*8 den_vap,rolref,rol,pld,comw, sl_new, xnl
       parameter(tol_frac = 1.d-18)
 c gaz notes 090719
 c add arrays to comdi    
@@ -1649,34 +1638,13 @@ c
          i2=i+nr2 
          sl = s(i)
          phi_old = phi(i)
-c gaz 042124 
-c         if(sl.ge.1.d0.or.ieos(i).ne.2) then 
-         if(ieos(i).eq.1) then            
+         if(sl.ge.1.d0.or.ieos(i).ne.2) then            
           phi(i)=phi_old-bp(i1)*strd
           cnlf(i) = cnlf(i)-bp(i2)*strd
          else
           phi(i)=phi_old-bp(i1)*strd
-          s(i) = sl-bp(i2)*strd  
-c          s(i) = min(1.d0,s(i))        
+          s(i) = s(i)-bp(i2)*strd          
          endif
        enddo
-       else if(iflg.eq.3) then  
-c gaz 041724
-c estimate saturation if phase change
-c from solubilty gt sol max
-
-       i = mi1
-       if(s(i).ge.1.0) then
-        xnl = cnlf(i)
-        rolref=crl(1,1)
-        comw=crl(3,1)
-        pld  = phi(i)
-        rol=rolref*(1.0+comw*(pld-pref))
-        den_vap = roc0*(273.0/(tref+273.0))*pref/0.101325 
-        sl_new = (den_vap-rol*xnl)/(den_vap-rol*xnl_max)
-        s(i) = sl_new
-        continue
-       else
-       endif 
       endif
-      end                                    
+      end   

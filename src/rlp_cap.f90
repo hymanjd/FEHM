@@ -672,7 +672,8 @@ subroutine rlp3(itype,it,ir,mi,sw,hp,dhp,rw,drww,rnw,drnw_w)
        	iflag=2
        endif
     if (rlp_fparam(it,kf+1).lt.0.) then  ! this will be -99 if fracture parameters were not specified
-       ! No fracture model      
+       ! No fracture model 
+! gaz 041424   
        	call vgrlps(iflag, sw,  slr, smax, lambda, tol_l, tol_u, &  
             rw, drww, rnw, dummy)
          drnw_w = -1.*dummy            

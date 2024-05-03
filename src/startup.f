@@ -394,7 +394,6 @@ C***********************************************************************
       use comsi, only : idof_stress
       use comsptr, only : sptrak
       use avsio, only : iovapor
-      use com_prop_data, only :  ihenryiso
       use comwt
       use comzone
       use davidi
@@ -870,24 +869,6 @@ c s kelkar 3 July 2014, for calculating heat flow vectors
 c new placement of peint
       if (i_init.ne.0) call peint
       if (iread .gt. 0) call diskread
-c gaz 040224 convert mass_frac if needed
-      if(allocated(read_mfrac_iso)) then
-       if(read_mfrac_iso(2)) then
-        call gas_frac_2phase_iso(1)
-c gaz 041924 need to call solubility here
-        do i=1,n0
-         if(s(i).lt.1.0) then
-          ieos(i) = 2
-          so(i) = s(i)
-         else
-          so(i) = 1.d0
-          s(i) = 1.d0
-          ieos(i) = 1
-         endif
-        enddo
-       continue
-       endif
-      endif
       if(isalt.ne.0) call saltctr(20,0,0.0d00,0.0d00)
       close (1010)
 
@@ -1344,17 +1325,7 @@ c         if (to (i) .le. zero_t)   to (i) = tin0
          t (i) = to(i)
          vtot = vtot + volume(i)
       end do
-c gaz 042024 added  cnlo(i) , check phase state
-         if(ihenryiso.ne.0) then
-          do i= 1,n
-           cnlf(i) = cnlof(i)
-           if(s(i).ge.1.d0) then
-            ieos(i) = 1
-           else
-            ieos(i) = 2
-           endif
-          enddo
-         endif
+
       if (mass_read) then
          iconv_tmp = iconv
          iconv = 1
