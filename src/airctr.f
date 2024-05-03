@@ -402,6 +402,8 @@ c gaz 103019 added strd_satneg for under relaxation when neg saturations
 c gaz 081623   
       real*8 strd_satneg, strd_old, phi_unsat_to_sat, p_uzmin
       real*8 strd1, strd2, phi_old
+c gaz 042224 
+      real*8 xnl_tol, s_xnl_tol
 c gaz 081823 ieosd
       integer ieosd,nr_test
       integer i_t_bad 
@@ -437,7 +439,8 @@ c air is default gas
             itype_meth = 0
             itype_co2 = 0
             itype_h2 = 0
-            ihenryiso = 0
+c gaz 030924 ihenryiso set scannin           
+c            ihenryiso = 0
             read(inpt,'(a80)')  dum_air    
             read(dum_air,*) tref, pref
 c gaz 121323 added read Henry's constant
@@ -447,9 +450,9 @@ c gaz 121323 added read Henry's constant
               itype_meth = 1
               itype_air = 0
               do j = i+2,80
-               if(dum_air(j:j).ne.' ') then
-                read(dum_air(j:j+14),'(g15.5)') alpha_meth
-                ihenryiso = 1
+               if(dum_air(j:j+4).eq.'henry'.or.
+     &          dum_air(j:j+4).eq.'HENRY') then
+                read(dum_air(j+5:80),*) alpha_meth
                 go to 1000
                endif
               enddo
@@ -459,9 +462,9 @@ c gaz 121323 added read Henry's constant
               itype_co2 = 1
               itype_air = 0
               do j = i+2,80
-               if(dum_air(j:j).ne.' ') then
-                read(dum_air(j:j+14),'(g15.5)') alpha_co2
-                ihenryiso = 1
+               if(dum_air(j:j+4).eq.'henry'.or.
+     &          dum_air(j:j+4).eq.'HENRY') then
+                read(dum_air(j+5:80),*) alpha_co2
                 go to 1000
                endif
               enddo
@@ -471,9 +474,9 @@ c gaz 121323 added read Henry's constant
               itype_h2 = 1
               itype_air = 0
               do j = i+2,80
-               if(dum_air(j:j).ne.' ') then
-                read(dum_air(j:j+14),*) alpha_h2
-                ihenryiso = 1
+               if(dum_air(j:j+4).eq.'henry'.or.
+     &          dum_air(j:j+4).eq.'HENRY') then
+                read(dum_air(j+5:80),*) alpha_h2
                 go to 1000
                endif
               enddo
@@ -482,9 +485,9 @@ c gaz 121323 added read Henry's constant
      &        dum_air(i:i+2).eq.'AIR') then
               itype_air = 1
               do j = i+2,80
-               if(dum_air(j:j).ne.' ') then
-                read(dum_air(j:j+14),*) alpha_air
-                ihenryiso = 1
+               if(dum_air(j:j+4).eq.'henry'.or.
+     &          dum_air(j:j+4).eq.'HENRY') then
+                read(dum_air(j+5:80),*) alpha_air
                 go to 1000
                endif
               enddo
@@ -531,7 +534,9 @@ c default is air
 c
 c gaz 121923 initializing cnlf need to program input   <<<<<<<<<<< 
 c
-        read(inpt,'(a80)')  dum_air  
+c gaz 031024 initial mass fracion done in pres
+      go to 450        
+       read(inpt,'(a80)')  dum_air  
         if(dum_air(1:8).eq.'massfrac') then
          read(dum_air(9:80),*) xnl_ini
          xnl_ini = max(xnl_ini,1.d-20)
@@ -547,6 +552,7 @@ c gaz 021324
           dclef(i) = 0.0d0  
          enddo
         endif
+450   continue
 c     
 c     set max and min values of p and t
 c     
@@ -768,14 +774,16 @@ c
                            ieos(mi)=2
                            ieos_c = ieos_c +1 
                         else if(s(mi).gt.1.0.and.ieos(mi).eq.2) then
+                          if(ihenryiso.eq.0) then
                            ieos(mi)=1
 c gaz 120919                            
                            s(mi) = 1.0d0
-c                           phi(mi) = phi(mi) + pchng
+                           phi(mi) = phi(mi) + pchng
 c gaz 010623
                            pcp(mi) = 0.0d0
                            strd = min(strd_iter,strd)
                            ieos_c = ieos_c +1
+                          endif
 c  gaz 081923 le to lt  
                         else if(s(mi).lt.0.0d0.and.ieos(mi).eq.2) then
                            s(mi)=0.0d0
@@ -784,31 +792,51 @@ c  gaz 081923 le to lt
                            ieos_c = ieos_c +1  
                         endif
                        if(ihenryiso.ne.0) then
-                        xnl_chng_low =0.999
-                        xnl_chng_high =1.001
+                        xnl_tol =1.d-09
+                        s_xnl_tol = 1.d-6
                         if(s(mi).ge.1.d0.and.ieos(mi).eq.2) then
+c gaz 042124 
+                         call solubility_isothermal(1,mi)
+                         xnl_max = xnl_ngas(mi,1)
+                         if(abs(cnlf(mi)-xnl_max).gt.xnl_tol) then 
+                          cnlf(mi)= xnl_max 
+                          s(mi) = 1.d0 
+                          ieos(mi) = 1
+                          strd = strd_mass 
+                          strd = 0.995
+                         else
+                          s(mi) = 1.0d0-s_xnl_tol
+                          strd = 0.995d0
+                         endif                    
+                        else if(s(mi).eq.1.d0.and.ieos(mi).eq.1) then
                          call solubility_isothermal(1,mi)
                           xnl_max = xnl_ngas(mi,1)
-                          if(cnlf(mi).ge.xnl_max) then
-                           cnlf(mi)= xnl_max*xnl_chng_high
+c gaz  042824 test
+c                         if(cnlf(mi).gt.xnl_max+xnl_tol) then
+                          if(abs(cnlf(mi)-xnl_max).gt.xnl_tol.and.
+     &                       cnlf(mi).gt.xnl_max) then
+                            cnlf(mi)= xnl_max
                             ieos(mi)=2
-                            s(mi) = 0.999999d0
-                            strd = strd_mass
+c gaz 041724 calc s(mi) in  phase_change_mass_conv
+                            s(mi) = 1.d0- s_xnl_tol
+c
+                            strd = 0.995d0
+                          else
+                            ieos(mi)=1
                           endif
-                        else if(s(mi).lt.1.0d0.and.ieos(mi).eq.1) then
+                        else if(s(mi).lt.1.0d0.and.ieos(mi).eq.2) then
                           call solubility_isothermal(1,mi) 
                           xnl_max = xnl_ngas(mi,1)
-                          if(cnlf(mi).lt.xnl_max-1.d-14) then
-                            cnlf(mi) = cnlf(mi)*xnl_chng_low
-                            strd = strd_mass
-                            pcp(mi) = 0.0d0
-                            s(mi) = 1.0d0
-c gaz 010524
-                            ieos(mi) = 2
+                          if(cnlf(mi).lt.xnl_max-xnl_tol) then
+c                         call phase_change_mass_conv(3,mi,mi)
+c                            strd = strd_mass
+c                            strd = 0.95
+c                            cnlf(mi)= xnl_max
+c                            ieos(mi) = 2
                           endif                         
                         endif
                        endif
-                       strd = min(strd_old,strd)
+                             strd = min(strd_old,strd)
                      enddo
 c gaz 110319 could use some cleanup  
 c gaz 121923 good place to check phase gas solubility
@@ -1058,14 +1086,16 @@ c     head solution
      &                       0.d00,max(phi(md)-phi_inc,0.1d00),qcd
                      else
 c     two-phase solution
-c gaz 121923 calc total mass fraction
+c gaz 121923 output total mass fraction, liquid mass fraction
                         call phase_change_mass_conv(1,md,md)
                         if (iout .ne. 0) write(iout,804) 
      &                     md,phi(md),pcp(md),
-     &                     phi(md)-pcp(md),qcd,1.-s(md),frac_gas_iso(md)
+     &                     phi(md)-pcp(md),qcd,1.-s(md),
+     &                     frac_gas_iso(md),cnlf(md)
                         if (iatty .ne. 0)
      &                     write(iatty,804) md,phi(md),pcp(md),
-     &                     phi(md)-pcp(md),qcd,1.-s(md),frac_gas_iso(md)
+     &                     phi(md)-pcp(md),qcd,1.-s(md),
+     &                     frac_gas_iso(md),cnlf(md)
                      endif
                   enddo
                enddo
@@ -1073,9 +1103,9 @@ c gaz 121923 calc total mass fraction
      &              a9,26x, 'source/sink', /, 3x,'Node',1x,
      &              '  P (MPa)',3x,'P Cap (MPa)',1x,'P Liq (MPa)'
      &              ,1x,'Vapor (kg/s)',5x,'S gas',8x,
-     &              'Gas (mfrac)')
+     &              'Tot (mfrac)',4x,'Liq (mfrac)')
  804           format(i7,1p,1x,g11.4,1x,g11.4,1x,g11.4,1x,g11.4,3x,
-     &                g13.5,3x,g12.5)
+     &                g13.5,3x,g12.5,3x,g12.5)
 c     calculate global mass and energy flows
                if (iout .ne. 0) then
                   write(iout,703) 
@@ -1115,14 +1145,15 @@ c            tref=crl(6,1)
                endif
                iieos(i)=1
                if(ieos(i).eq.1) then
-                  ieos(i)=2
+c gaz 042224 
+c                  ieos(i)=2
                   if (irdof .ne. 13 .or. ifree .ne. 0) then
-                     s(i)=1.0
-                     so(i)=1.0
+                     s(i)=1.0d0
+                     so(i)=1.0d0
                   end if
                endif
                if(abs(irdof).eq.14) then
-                  denj(i)=1.0-s(i)
+                  denj(i)=1.0d0-s(i)
                endif
             enddo
 c     

@@ -307,6 +307,7 @@ C***********************************************************************
       use comrlp, only: rlpnew, ntable, ntblines,nphases,rlp_phase,
      +  rlp_group
       use comrxni
+      use com_prop_data, only : ihenryiso
       use comsi
       use comsk
       use comsplitts
@@ -459,6 +460,7 @@ c gaz 062920 igdpm_add used in setting gdpm secondary zones
 c zvd 17-Aug-09 move boun flag initializations here
 c gaz 120323 
       idiff_iso  = 0
+      ihenryiso = 0
       if(allocated(izone_free_nodes)) izone_free_nodes = 0
       if(allocated(move_type)) move_type=0
       compute_flow = .true.
@@ -1045,10 +1047,17 @@ c  tables read from control file (if available)
       else if (macro(1:3)  .eq.  'air')  then
 c     need to know if air-water  is envoked
          ico2 = -2 
-c gaz 110819 reading tref, pref here (these variables are now global          
+c gaz 110819 reading tref, pref here (these variables are now global)          
          call start_macro(inpt, locunitnum, macro)
           read(locunitnum,'(a80)') wdd1(1:80)
-          read(locunitnum,*) tref, pref
+c gaz 030924 read more if solubility in included          
+         read(locunitnum,'(a80)') wdd1(1:80)
+          read(wdd1,*) tref, pref
+          do i = 1,75
+           if(wdd1(i:i+4).eq.'henry') then
+            ihenryiso = 1
+           endif
+          enddo
          call done_macro(locunitnum)           
       else if (macro .eq. 'ice ' .or. macro .eq. 'meth') then
          ice = 1
