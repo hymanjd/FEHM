@@ -445,37 +445,20 @@ c * * * *
       use comdti
       use comai
       use comki
+      use comrlp_param
       implicit none
-
-      real*8 scutm,hmin,darcyf,tol_l,tol_u,su_cut 
-      parameter(scutm = 1.d-05)
-      parameter(hmin = 1.d-10)
-      parameter(darcyf = 1.d12)
-      parameter(tol_l  = 1.d-5)
-      parameter(tol_u  = 1.d-5)
-      parameter(su_cut = 0.9999d00)
-c gaz 121423 modified sucut for irlpd =5 (rlps(S))
-      real*8 su_cut5
-      parameter (su_cut5 = 0.99d0)
-
+c gaz 030324 removed sucut and other regularization parameters to comrlp_parm
       integer iz,ndummy,i,irlpd,mi,ieosd,it,ir,j,num_models
-      integer :: ireg = 1
-      real*8 alpha,beta,alamda,alpi,smcut,slcut,fac,ds,dhp
-      real*8 rp1,rp2,rp3,rp4,denom,star,hp,rl1,rv1,hp1,dhp1
-      real(8) :: rl = 1., rv = 1., drls = 0., drvs = 0.
-      real*8 drls1,drvs1,akf,akm,porf,permb,sl
-      real*8 smcutm,smcutf,alpham,alamdam,facf
-      real*8 rpa1, rpa2, rpa3, rpa4, rpa5
       real*8, allocatable :: xfptmp(:), yfptmp(:), zfptmp(:)
       logical null1,ex
-      integer ireg0
 c gaz 100118      
       integer i1, i2, i3, i4, ic, iunit_rlp, open_file
-      character*80  rlp_temp_file   
-      save ireg,ireg0
+      character*80  rlp_temp_file 
+c gaz 041224
+      real*8 rp4a  
+c gaz 030324     save ireg,ireg0
       if(l.eq.0) ireg0 = 0
       
-
       if(iz.eq.0) then
 c     read in data
 
@@ -691,6 +674,7 @@ c     van Genutchen capillary pressure and relative perms
 c with rlp(S) 
                read(inpt,*) irlpt(i), rp1f(i), rp2f(i), rp3f(i), 
      *              rp4f(i), rp5f(i), rp6f(i)
+              continue
             else if (irlpd .eq. 6) then
 c     van Genutchen capillary pressure and relative perms fracture/matrix
 c with rlp(S) 
@@ -858,7 +842,11 @@ c     get fit at saturated end(star=su_cut)
 c                  call  vgrlps(0, sl, star, rp3, rp4, rp1, rp2, 
 c     2                 tol_l, tol_u, rl, drls, rv, drvs )
 c gaz 120723 made consistent  header
-                   call  vgrlps(0, sl, rp1, rp2, rp4, 
+c gaz 041224
+                   tol_l = rp6f(i)
+                   tol_u = 1.0-su_cut
+                   rp4a = 1.-1./rp4
+                   call  vgrlps(0, sl, rp1, rp2, rp4a, 
      2                 tol_l, tol_u, rl, drls, rv, drvs )
                endif
                if (irlpt(i) .eq. 9) then
@@ -1128,8 +1116,9 @@ c                  call vg_regions(1,ireg,mi,su_cut)
      3                 rp10f(it), rp6f(it),su_cut ,
      4                 cp1f(it),cp2f(it),hp, dhp ,ireg    )
                   star = (sl-rp1f(it))/(rp2f(it)-rp1f(it))
+c gaz 040824
                   call vgrlp(sl, star, rp3, rp4, hmin, hp,         
-     2                 dhp, rl, drls, rv, drvs,2)
+     2                 dhp, rl, drls, rv, drvs,0)
                   pcp(mi) = 9.8e-3 * hp
                   dpcef(mi) = 9.8e-3 * dhp
                elseif(irpd.eq.8) then
@@ -1171,14 +1160,22 @@ c rlp(S)
      4                 cp1f(it),cp2f(it),hp, dhp ,ireg    )
                   star = (sl-rp1f(it))/(rp2f(it)-rp1f(it))                                             f
 c gaz 120723 fix number of parameters   (compare to rlp_cap call to vgrlps)
-                  call  vgrlps(2, sl, rp1, rp2, rp4, 
+c gaz 041223 switched out rp4(beta) for rp3 alamda
+                   tol_l = rp6f(it)
+                   tol_u = 1.0-su_cut
+c gaz test 041524
+                   tol_l = 1.d-5 
+                   tol_u = 1.d-5
+                  rp4a = 1.-1./rp4
+                  call  vgrlps(2, sl, rp1, rp2, rp4a, 
      2                 tol_l, tol_u, rl, drls, rv, drvs )
                   pcp(mi) = 9.8e-3 * hp
                   dpcef(mi) = 9.8e-3 * dhp
 c gaz 121323 skip over testing  by commenting next line
                  go to 878
                   if(sl.le.1.0) then
-                   if(mi.eq.1) write(ierr,*) 'su_cut5', su_cut5
+c gaz 041524 su_cut5 not used
+c                   if(mi.eq.1) write(ierr,*) 'su_cut5', su_cut5
                    if(mi.eq.1) write(ierr,865)  rp1, rp2, rp3, rp4
                    if(mi.eq.1) write(ierr,866) 
                    write(ierr,877) star, sl,rl,rv, hp
@@ -1375,9 +1372,13 @@ c                        call vg_regions(2,ireg,mi,su_cut)
      3                       rp23f(it), rp16f(it), su_cut,    
      4                       cp3f(it),cp4f(it),hp, dhp, ireg    )
                         star = (sl-rp11f(it))/(rp12f(it)-rp11f(it))
-                        call  vgrlps(2, sl, star, rp13f(it),
-     2                       rp14f(it), rp11f(it), rp12f(it),
-     3                       tol_l, tol_u, rl, drls, rv, drvs)
+c gaz 041324 calling parameters changed
+c note rp14f(it)
+                     tol_l = rp6f(it)
+                     tol_u = 1.0-su_cut
+                     call  vgrlps(2, sl, rp11f(it), rp12f(it),
+     2                    1.-1./rp14f(it),tol_l, tol_u, 
+     3                    rl1, drls1, rv1, drvs1)
                         permb = akf * porf
                         if(irpd.eq.7) then 
 c calculate fracture term(from Sandia) if necessary
@@ -1392,8 +1393,12 @@ c                        call vg_regions(1,ireg,mi,su_cut)
      3                       rp10f(it), rp6f(it), su_cut,      
      4                       cp1f(it),cp2f(it),hp, dhp, ireg    )
                         star = (sl-rp1f(it))/(rp2f(it)-rp1f(it))
-                        call  vgrlps(2, sl, star, rp3, rp4, rp1, rp2, 
-     2                       tol_l, tol_u, rl, drls, rv, drvs )
+c gaz 041324 corrected num calling parameters
+                     tol_l = rp6f(it)
+                     tol_u = 1.0-su_cut
+                     rp4a = 1.-1./rp4f(it)
+                     call  vgrlps(2, sl, rp1f(it),rp2f(it), rp4a,   
+     2                     tol_l, tol_u, rl, drls, rv, drvs )
                         permb = akm * (1. - porf)
                         if(irpd.eq.7) then
 c calculate fracture term(from Sandia) if necessary
@@ -1409,12 +1414,20 @@ c                     call vg_regions(1,ireg,mi,su_cut)
      3                    rp10f(it), rp6f(it), su_cut,      
      4                    cp1f(it),cp2f(it),hp, dhp, ireg    )
                      star = (sl-rp1f(it))/(rp2f(it)-rp1f(it))
-                     call  vgrlps(2, sl, star, rp3, rp4, rp1, rp2, 
-     2                    tol_l, tol_u, rl, drls, rv, drvs )
+c gaz 041324 corrected num calling parameters
+                     tol_l = rp6f(it)
+                     tol_u = 1.0-su_cut
+                     rp4a = 1.-1./rp4f(it)
+                     call  vgrlps(2, sl, rp1f(it),rp2f(it), rp4a,   
+     2                     tol_l, tol_u, rl, drls, rv, drvs )
                      star = (sl-rp11f(it))/(rp12f(it)-rp11f(it))
-                     call  vgrlps(2, sl, star, rp13f(it),
-     2                    rp14f(it), rp11f(it), rp12f(it),
-     3                    tol_l, tol_u, rl1, drls1, rv1, drvs1)
+c gaz 041324 calling parameters changed
+c note rp14f(it)
+                     tol_l = rp6f(i)
+                     tol_u = 1.0-su_cut
+                     call  vgrlps(2, sl, rp11f(it), rp12f(it),
+     2                    1.-1./rp14f(it),tol_l, tol_u, 
+     3                    rl1, drls1, rv1, drvs1)
                      permb = akf * porf + akm * (1. - porf)
                      rl=(akf*rl1*porf+akm*rl*(1.0-porf))/permb
                      drls=(akf*drls1*porf+akm*drls*(1.0-porf))/permb
