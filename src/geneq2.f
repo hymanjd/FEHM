@@ -427,7 +427,7 @@ CPS END geneq2
 CPS 
 C**********************************************************************
 c
-c generate equations for 2-d and 3-d isothermal ngas-water 
+c generate equations for 3-d schemes'isothermal air-water ,
 c full derivatives'
 c
       use comflow
@@ -440,8 +440,6 @@ c
       use comci
       use combi
       use comdti
-c gaz 112223 
-      use com_prop_data, only : ctest
       use comwellphys
       use comai
       implicit none
@@ -546,20 +544,7 @@ c     real*8 sxzc
       real*8 delz2
       real*8 reduction_factor
       real*8 grav_air
-c gaz 111223 added concentration(gas)
-      real*8  cnli, cnlkb, dcli, dclkb, dlcpi, dlcpkb
-c gaz 112223 made ctest global
-      real*8 acxyf, acxy, dclskb, dclsi, dlcekb,dlcei  
-      real*8 gasdiff, diffcoef, por_avg, sat_avg    
-      real*8 dgdiffdpi,dgdiffdpkb,dgdiffdsi,dgdiffdskb    
-      real*8 thxi,thxkb,thyi,thykb, thzi,thzkb
-      real*8 sx3c,reduction_factor_t  
-      real*8 roli,rol_avg
-      real*8   dsatavgpi,dsatavgpkb,dsatavgsi,dsatavgskb 
-      real*8   dporavgpi,dporavgpkb,dporavgsi,dporavgskb 
-      real*8   drolavgpi,drolavgpkb,drolavgsi,drolavgskb        
-              
-      parameter(dis_tol=1.d-15)
+      parameter(dis_tol=1.d-12)
 
       logical bit
       integer isl
@@ -570,6 +555,8 @@ c following variables are associated with the drift flux nodel
       real*8 mdrifti,dmdriftpi,dmdriftei,mdrift_part
       real*8 mdriftkb,dmdriftpkb,dmdriftekb
       real*8 area_face,dmdrpkb,dmdrekb,dmdrpi,dmdrei
+c gaz debug   
+      alxi = ps(1)
 c changed by avw -- entered here by seh
       neqp1=neq+1
       if(i.gt.neq) then
@@ -585,6 +572,7 @@ c changed by avw -- entered here by seh
 c
 c storage for upwind
 c
+
       sx1d=sx1(i)
       axi=pnx(i)
       ayi=pny(i)
@@ -596,13 +584,8 @@ c
       alzi=azi
       avzi=azi
       pvii=phi(i)
-      roli = rolf(i)
       dili=dil(i)
       dilpi=dilp(i)
-c gaz 111223 added concentration(gas) in liquid (via Henry's law)
-      cnli=cnlf(i)*ctest
-      dcli=dclf(i)*ctest
-      dclsi=dclef(i)*ctest
       if(irdof.ne.13) then
          phii=pvii-pcp(i)
          dpvti=dpcef(i)
@@ -616,11 +599,6 @@ c gaz 111223 added concentration(gas) in liquid (via Henry's law)
          swi = 1.0d0
       endif
       ti=t(i)
-      if(idiff_iso.ne.0) then
-       thxi = thx(i)
-       thyi = thy(i)
-       thzi = thz(i)
-      endif
 c gaz 020217      
 c determine direction of model (define for both materials) in geneg2 and other geneq etc 
       if(gdkm_flag.eq.1) then
@@ -806,70 +784,42 @@ c
                   sx4d=t6(neighc)
                   dilkb=dil(kb)
                   dilpkb=dilp(kb)
-                  cnlkb=cnlf(kb)*ctest
-                  dclkb=dclf(kb)*ctest
-                  dclskb=dclef(kb)*ctest
                   dlpi=-pxy+0.5*sx4d*dglp(i)*
      2                 (cord(kz,igrav)-cord(iz,igrav))
                   dlpkb=pxy+0.5*sx4d*dglp(kb)*
      2                 (cord(kz,igrav)-cord(iz,igrav))
 c 
-c gaz 111223 add gas fraction in the liquid phase
-c                  axyf=(fid*dilkb+fid1*dili)
-c water mass fraction mod
-                  axyf=fid*dilkb*(1.0-cnlkb)+fid1*dili*(1.0-cnli)
-                  acxyf=fid*dilkb*cnlkb+fid1*dili*cnli
+                  axyf=(fid*dilkb+fid1*dili)
                   axy=axyd*axyf
-                  acxy=axyd*acxyf
                   if(irdof.ne.13) then
                      dilekb=dile(kb)
                      dlei=pxy*dpvti+0.5*sx4d*dgle(i)*
      2                    (cord(kz,igrav)-cord(iz,igrav))
                      dlekb=-pxy*dpcef(kb)+0.5*sx4d*dgle(kb)
      *                    *(cord(kz,igrav)-cord(iz,igrav))
-c gaz 111223 modified derivatives axy wrt saturation 
-                     dlaei=dlei*axyf+axyd*fid1*dilei*
-     &                          (1.0-cnli)
-                     dlaekb=dlekb*axyf+axyd*fid*dilekb*
-     &                          (1.0-cnlkb)
+                     dlaei=dlei*axyf+axyd*fid1*dilei
+                     dlaekb=dlekb*axyf+axyd*fid*dilekb
                   endif
-c  derviatives axy  wrt pressure
-c                  axyf=fid*dilkb*(1.0-cnlkb)+fid1*dili*(1.0-cnli)
-                  dlapi=dlpi*axyf+axyd*(fid1*dilpi 
-     &                  - fid1*dili*dcli)
-                  dlapkb=dlpkb*axyf+axyd*(fid*dilpkb
-     &                  - fid*dilkb*dclkb)
+c
+                  dlapi=dlpi*axyf+axyd*fid1*dilpi
+                  dlapkb=dlpkb*axyf+axyd*fid*dilpkb
 c     
                   a_axy(iau+nmatavw)=axy
                   a_axy(ial+nmatavw)=-axy
-c  derviatives (wrt P) acxy  (gas phase in water phase)
-c                 acxyf=fid*dilkb*cnlkb+fid1*dili*cnli
-                  dlcpi=dlpi*acxyf+axyd*fid1*(dcli*dili+cnli*dilpi)
-                  dlcpkb=dlpkb*acxyf+axyd*fid*(dclkb*dilkb+cnlkb*dilpkb)
-c
+
                   bp(iz+nrhs(1))=bp(iz+nrhs(1))+axy
                   bp(kz+nrhs(1))=bp(kz+nrhs(1))-axy
-c gaz 111223   added dissolved gas flow in liquid phase gas mass balance
-                  bp(iz+nrhs(2))=bp(iz+nrhs(2))+acxy
-                  bp(kz+nrhs(2))=bp(kz+nrhs(2))-acxy
-c
-                  a(ial+nmat(3))=a(ial+nmat(3))-dlcpi
-                  a(jmia+nmat(3))=a(jmia+nmat(3))+dlcpi 
-                  a(iau+nmat(3))=a(iau+nmat(3))+dlcpkb
-                  a(jml+nmat(3))=a(jml+nmat(3))-dlcpkb   
-c         
-                  a(ial+nmat(1))=a(ial+nmat(1))-dlapi
                   a(jmia+nmat(1))=a(jmia+nmat(1))+dlapi
+                  a(ial+nmat(1))=a(ial+nmat(1))-dlapi
                   a(iau+nmat(1))=a(iau+nmat(1))+dlapkb
                   a(jml+nmat(1))=a(jml+nmat(1))-dlapkb
                   if(irdof.ne.13) then
-C See 2d solution for more terms
                      a(jmia+nmat(2))=a(jmia+nmat(2))+dlaei
                      a(ial+nmat(2))=a(ial+nmat(2))-dlaei
                      a(iau+nmat(2))=a(iau+nmat(2))+dlaekb
                      a(jml+nmat(2))=a(jml+nmat(2))-dlaekb
                   endif
-62            continue
+ 62            continue
             endif
          endif
          if(irdof.ne.13) then   
@@ -982,7 +932,7 @@ c face area of CV needed for drift mass flux
                   endif                           
                   a_vxy(iau+nmatavw)=vxy + mdrift_part
                   a_vxy(ial+nmatavw)=-(vxy + mdrift_part)
-c gaz 111223 no change because gas phase is pure
+
                   bp(iz+nrhs(2))=bp(iz+nrhs(2))+(vxy + mdrift_part)
                   bp(kz+nrhs(2))=bp(kz+nrhs(2))-(vxy + mdrift_part)
                   a(jmia+nmat(3))=a(jmia+nmat(3))+dvapi+dmdrpi
@@ -1013,15 +963,10 @@ c
             alxkb=axkb
             alykb=aykb
             reduction_factor = red_factor(istrw_itfc(it11(jm)))
-            reduction_factor_t = reduction_factor
             perml(1)=2.*alxkb*alxi/(alxkb+alxi)
             perml(2)=2.*alykb*alyi/(alykb+alyi)
             radkb=0.5*(radi+cord(kz,3))
             sx2c=radkb*(sx(iw,isox)+sx(iw,isoy))
-            thxkb=thx(kb)
-            thykb=thy(kb)
-            sx2t=2.*thxi*thxkb/(thxi+thxkb)
-            sx3t=2.*thyi*thykb/(thyi+thykb)
             pvikb=phi(kb)
             if (irdof .ne. 13) then
                phikb=pvikb-pcp(kb)
@@ -1052,31 +997,12 @@ c
             pxy = pxy*reduction_factor
             pxyi=pxy*(phikb-phii)
             pxyh=pxy*(pvikb-pvii)
-             if(i_dir_gdkm.ge.0.and.reduction_factor_t.gt.2) then
-               kb_pri = reduction_factor_t -2
-               reduction_factor_t = 1.0 
-               if(i_dir_gdkm.eq.1) then
-                 sx3c = sx2c*sx2t
-               else if(i_dir_gdkm.eq.2) then
-                 sx3c = sx2c*sx3t  
-               else if(dis2.gt.dis_tol) then
-                 sx3c=sx2c*dis2/
-     &          (delx2/sx2t+dely2/sx3t)
-               endif                                    
-            elseif(dis2.gt.dis_tol.and.iwd.gt.0) then
-              sx3c=sx2c*dis2/
-     &          (delx2/sx2t+dely2/sx3t)
-            else
-               sx3c=sx2c*sx_mult*max(sx2t,sx3t)
-            endif
-            if(reduction_factor_t.gt.2) reduction_factor_t = 1.
-             sx3c = reduction_factor_t*sx3c
-             sx2c = reduction_factor_t*sx2c
             t1(neighc)=pxyi
             t2(neighc)=pxyh
             t3(neighc)=pxy
             t4(neighc)=pxy
-            t5(neighc)=sx3c               
+c added area term GAZ (11-12-08)      
+            t5(neighc)=sx2c*sqrt(dis2)                  
             t6(neighc)=-grav*t3(neighc)
             t7(neighc)=-grav_air*t4(neighc)
  69      continue
@@ -1121,7 +1047,7 @@ cc                  endif
 cc               endif
  71         continue
 c     
-c     form 2-d equations
+c     form equations
 c     
             if(isl.ne.0) then
                do 72 jm=1,iq
@@ -1140,64 +1066,33 @@ c
                   sx4d=t6(neighc)
                   dilkb=dil(kb)
                   dilpkb=dilp(kb)
-                  cnlkb=cnlf(kb)*ctest
-                  dclkb=dclf(kb)*ctest
-                  dclskb=dclef(kb)*ctest
                   dlpi=-pxy+0.5*sx4d*dglp(i)*(cord(kz,igrav)-
      2                 cord(iz,igrav))
                   dlpkb=pxy+0.5*sx4d*dglp(kb)*
      2                 (cord(kz,igrav)-cord(iz,igrav))
-c 
-c gaz 111223 add gas fraction in the liquid phase
-c                  axyf=(fid*dilkb+fid1*dili)
-c water mass fraction mod
 c
-c gaz 122723  
-c                  axyf=fid*dilkb*(1.0-cnlkb)+fid1*dili*(1.0-cnli)
-                  axyf=fid*dilkb+fid1*dili
-                  acxyf=fid*dilkb*cnlkb+fid1*dili*cnli
+                  axyf=(fid*dilkb+fid1*dili)
                   axy=axyd*axyf
-                  acxy=axyd*acxyf      
                   if(irdof.ne.13) then
                      dilekb=dile(kb)
                      dlei=pxy*dpvti+0.5*sx4d*dgle(i)*
      2                    (cord(kz,igrav)-cord(iz,igrav))
                      dlekb=-pxy*dpcef(kb)+0.5*sx4d*dgle(kb)
      *                    *(cord(kz,igrav)-cord(iz,igrav))
-c gaz 111223 modified derivatives axy wrt saturation 
-                     dlaei=dlei*axyf+axyd*fid1*dilei                        
+                     dlaei=dlei*axyf+axyd*fid1*dilei
                      dlaekb=dlekb*axyf+axyd*fid*dilekb
                   endif
-c  derviatives axy  wrt pressure
-c                  axyf=fid*dilkb*(1.0-cnlkb)+fid1*dili*(1.0-cnli)
+c
                   dlapi=dlpi*axyf+axyd*fid1*dilpi
                   dlapkb=dlpkb*axyf+axyd*fid*dilpkb
 c     
                   a_axy(iau+nmatavw)=axy
                   a_axy(ial+nmatavw)=-axy
-c
-c  derviatives (wrt P) acxy  (gas phase in water phase)
-c                 acxyf=fid*dilkb*cnlkb+fid1*dili*cnli
-                  dlcpi=dlpi*acxyf+axyd*fid1*(dcli*dili+cnli*dilpi)
-                  dlcpkb=dlpkb*acxyf+axyd*fid*(dclkb*dilkb+cnlkb*dilpkb)
-c derviatives (wrt S) acxy  (gas phase in water phase)
-                  dlcei=dlei*acxyf+axyd*fid1*(dclsi*dili+cnli*dilei)
-                  dlcekb=dlekb*acxyf+axyd*fid*
-     &                   (dclskb*dilkb+cnlkb*dilekb)
-c
+
                   bp(iz+nrhs(1))=bp(iz+nrhs(1))+axy
                   bp(kz+nrhs(1))=bp(kz+nrhs(1))-axy
-c gaz 111223   added dissolved gas flow in liquid phase gas mass balance
-                  bp(iz+nrhs(2))=bp(iz+nrhs(2))+acxy
-                  bp(kz+nrhs(2))=bp(kz+nrhs(2))-acxy
-c
-                  a(ial+nmat(3))=a(ial+nmat(3))-dlcpi
-                  a(jmia+nmat(3))=a(jmia+nmat(3))+dlcpi 
-                  a(iau+nmat(3))=a(iau+nmat(3))+dlcpkb
-                  a(jml+nmat(3))=a(jml+nmat(3))-dlcpkb    
-c
+                  a(jmia+nmat(1))=a(jmia+nmat(1))+dlapi
                   a(ial+nmat(1))=a(ial+nmat(1))-dlapi
-                  a(jmia+nmat(1))=a(jmia+nmat(1))+dlapi      
                   a(iau+nmat(1))=a(iau+nmat(1))+dlapkb
                   a(jml+nmat(1))=a(jml+nmat(1))-dlapkb
                   if(irdof.ne.13) then
@@ -1205,91 +1100,10 @@ c
                      a(ial+nmat(2))=a(ial+nmat(2))-dlaei
                      a(iau+nmat(2))=a(iau+nmat(2))+dlaekb
                      a(jml+nmat(2))=a(jml+nmat(2))-dlaekb
-                     a(jmia+nmat(4))=a(jmia+nmat(4))+dlcei
-                     a(ial+nmat(4))=a(ial+nmat(4))-dlcei
-                     a(iau+nmat(4))=a(iau+nmat(4))+dlcekb
-                     a(jml+nmat(4))=a(jml+nmat(4))-dlcekb
                   endif
  72            continue
             endif
          endif
-c
-c gaz 111923 ngas diffusion
-c diffusion coefficients in thx,thy,thz
-c area term in t5
-c
-      if(idiff_iso.ne.0) then
-      do 66 jm=1,iq
-         kb=it8(jm)
-         kz=kb-icd
-         neighc=it9(jm)
-         heatc=t5(neighc)
-         iau=it11(jm)
-         ial=it12(jm)
-         jml=nelmdg(kz)-neqp1
-         diffcoef=t5(neighc) 
-         cnlkb=cnlf(kb)*ctest
-         dclkb=dclf(kb)*ctest
-         dclskb=dclef(kb)*ctest
-         sat_avg = 0.5d0*(s(i)+s(kb)) 
-c gaz 112823
-         sat_avg = 1.0d0
-         dsatavgpi = 0.0
-         dsatavgpkb = 0.0
-         dsatavgsi = 0.0
-         dsatavgskb = 0.0                                                           
-         por_avg = 0.5d0*(ps(i)+ps(kb)) 
-c gaz  113023 assume porosity is constant
-         dporavgpi = 0.0  
-         dporavgpkb = 0.0
-         dporavgsi = 0.0
-         dporavgskb = 0.0
-         rol_avg = 0.5d0*(roli+rolf(kb)) 
-         rol_avg = 1000.d0
-         drolavgpi = 0.0
-         drolavgpkb = 0.0
-         drolavgsi = 0.0
-         drolavgskb = 0.0 
-         gasdiff = por_avg*sat_avg*rol_avg*diffcoef*
-     &            (cnlf(kb)-cnli)
-c derivatives ignore d(ps)dp
-c gaz 112223 need to put 
-         dgdiffdpi = -por_avg*sat_avg*rol_avg*
-     &               diffcoef*dcli 
-         dgdiffdpkb = por_avg*sat_avg*rol_avg*
-     &               diffcoef*dclkb 
-         dgdiffdsi = -por_avg*sat_avg*rol_avg*
-     &               diffcoef*dclsi +
-     &               gasdiff/sat_avg*dsatavgsi
-         dgdiffdskb = por_avg*sat_avg*rol_avg*
-     &               diffcoef*dclskb + 
-     &               gasdiff/sat_avg*dsatavgskb
-c gaz 12523 testing
-c        nrhs(2) = gas eq
-         bp(iz+nrhs(2))=bp(iz+nrhs(2)) + gasdiff
-         bp(kz+nrhs(2))=bp(kz+nrhs(2)) - gasdiff
-         a(jmia+nmat(3))=a(jmia+nmat(3))+dgdiffdpi
-         a(jmia+nmat(4))=a(jmia+nmat(4))+dgdiffdsi
-         a(ial+nmat(3))=a(ial+nmat(3))-dgdiffdpi
-         a(ial+nmat(4))=a(ial+nmat(4))-dgdiffdsi
-         a(jml+nmat(3))=a(jml+nmat(3))-dgdiffdpkb
-         a(jml+nmat(4))=a(jml+nmat(4))-dgdiffdskb
-         a(iau+nmat(3))=a(iau+nmat(3))+dgdiffdpkb
-         a(iau+nmat(4))=a(iau+nmat(4))+dgdiffdskb
-c        nrhs(1) = water eq
-         bp(iz+nrhs(1))=bp(iz+nrhs(1)) - gasdiff
-         bp(kz+nrhs(1))=bp(kz+nrhs(1)) + gasdiff
-         a(jmia+nmat(1))=a(jmia+nmat(1))-dgdiffdpi
-         a(jmia+nmat(2))=a(jmia+nmat(2))-dgdiffdsi
-         a(ial+nmat(1))=a(ial+nmat(1))+dgdiffdpi
-         a(ial+nmat(2))=a(ial+nmat(2))+dgdiffdsi
-         a(jml+nmat(1))=a(jml+nmat(1))+dgdiffdpkb
-         a(jml+nmat(2))=a(jml+nmat(2))+dgdiffdskb
-         a(iau+nmat(1))=a(iau+nmat(1))-dgdiffdpkb
-         a(iau+nmat(2))=a(iau+nmat(2))-dgdiffdskb
-c gaz 010724 removed some coding qgas etc   geneq2_2l
- 66   continue
-      endif
          if(irdof.ne.13) then
 c     
 c     vapour phase calculations
