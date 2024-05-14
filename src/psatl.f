@@ -326,9 +326,17 @@ c            psatl=0.00123
             dpsats=0.0
          endif
         else
-          call get_h2o_sat_pressure(ifail,tl,psatl,dpst)
-            dpsatt=dpst
-            dpsats=0.0         
+c gaz 102420 make sure sat p and t defined above h2o crit point 
+          if(tl.lt.tcrit_h2o) then
+           call get_h2o_sat_pressure(ifail,tl,psatl,dpst) 
+           dpsatt=dpst
+           dpsats=0.0 
+          else 
+           psatl = pcrit_h2o
+            dpsatt=0.0
+            dpsats=0.0
+          endif
+c          call get_h2o_sat_pressure(ifail,tl,psatl,dpst)
         endif
 c
 c get vapor pressure lowering (salt concentration)
@@ -420,10 +428,22 @@ c failed to converge
             endif
             psatl=x
          end if
-       else
+         else
 c tl is the pressure,psatl = temp
-          call get_h2o_sat_temperature(ifail,tl,psatl,dpsatt)
-            dpsats=0.0    
+c gaz debug 092119   (removed 042521          
+c          if(l.eq.1) then
+c            write(ierr,*) ' psatl chk ', ifail,tl,psatl,dpsatt
+c          endif
+c here tl=is the pressure   
+c gaz 102420          
+          if(tl.lt.pcrit_h2o) then
+           call get_h2o_sat_temperature(ifail,tl,psatl,dpsatt)
+            dpsats=0.0  
+          else
+           psatl= tcrit_h2o
+           dpsats = 0.0 
+           dpsatt = 0.0
+         endif
         endif
       endif
  9000 continue

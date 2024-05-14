@@ -1,5 +1,5 @@
 !     Last change:  JD   12 Oct 2006    4:56 am
-!     GAZ  Oct 30 2015 changer co2 to h2o
+!     GAZ  Oct 30 2015 changed co2 to h2o
 module property_interpolate_1
 !***********************************************************************
 ! Copyright 2011 Los Alamos National Security, LLC  All rights reserved
@@ -111,20 +111,28 @@ contains
 
 
 
-  subroutine read_interpolation_data_1(ifail,infile,v_1,v_2,v_3,v_4)
+  subroutine read_interpolation_data_1(ifail,infile,v_1,v_2,v_3,v_4,v_5,v_6,v_7,v_8)
 
     ! --  Subroutine read_interpolation_data reads an interpolation dataset.
 
     implicit none
     integer, intent(out)       :: ifail
     character*(*), intent(in)  :: infile
-
+    ! gaz 112721 added coding to find T,P closest to h2o crit point
+    ! v_5 - pressure in table closest to true crit pressure (will be new crit value)
+    ! v_6 - temperature in table closest to true crit temperature (will be new crit value)
+    ! v_7 - true crit pressure
+    ! v_8 - true crit temperature
     integer                    :: iunit,ierr,it,ip,ia,isat
     real*8                     :: rtemp
-    real*8,intent(out)         :: v_1,v_2,v_3,v_4
+    real*8,intent(out)         :: v_1,v_2,v_3,v_4,v_5,v_6
+    real*8,intent(in)          :: v_7,v_8
     character*20               :: atemp
     character*200              :: afile
-
+    ! gaz 112721 set v_5 = v7, v_6 = v8 (for testing)
+    v_5 = v_7
+    v_6 = v_8
+    
     ifail=0
 
     iunit=nextunit_1()
@@ -218,7 +226,30 @@ contains
     read(iunit,*,err=9200,end=9250) (t(it),it=1,nt)
     read(iunit,*,err=9300,end=9350)
     read(iunit,*,err=9300,end=9350) (p(ip),ip=1,np)
+    
+    ! gaz 112721 determine closest t() to true crit temperature (v_8)
+       rtemp = 10000.D0
+       ia = 0
+       do it = 1 , nt
+        if(abs(t(it)-v_8).lt.rtemp) then
+         ia = it 
+         rtemp = abs(t(it)-v_8)
+        endif
+       enddo
+       v_6 = t(ia)
+    
+    ! gaz 112721 determine closest p() to true crit pressure (v_7)
 
+       rtemp = 10000.D0
+       ia = 0
+       do ip = 1 , np
+        if(abs(p(ip)-v_7).lt.rtemp) then
+         ia = ip 
+         rtemp = abs(p(ip)-v_7)
+        endif
+       enddo
+       v_5 = p(ia)       
+       
     ! -- The property type held within each array is now read.
 
     allocate(property_type(na),stat=ierr)
