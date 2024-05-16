@@ -1084,7 +1084,7 @@ c     Write results
  1047          format(a5,i7,a30,a4,i5,a8,f12.0)
 !              open(unit=99,file='flux_boun.macro',status='unknown')
                ifile1 = open_file('flux_boun.macro','unknown')
-               call headctr(2,0,0.0,0.0)        
+               call headctr(2,0,0.0d00,0.0d00)        
                write(*,*)'>>>> Printing new flow macro: flux_boun.macro'
                write(ifile1,1048) 
  1048          format('flow   [user sub = -401]')

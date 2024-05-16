@@ -1284,7 +1284,7 @@ c delete infinite reservoir nodes from mass balance calcs
 
 c check for steady state solution
                if(isteady.ne.0) then
-                  call steady(1,0.,0.)
+                  call steady(1,0.0d00,0.0d00)
                endif
 
 c

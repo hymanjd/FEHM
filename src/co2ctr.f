@@ -427,6 +427,13 @@ c applying tol_p to mass frac calc
 c     set tbnd for pco2 change(see about line 580)
        parameter(tbnd = -1.0)
        save ngas_flag, ngas_flag2
+
+c tam  avoid memory error when junk is passed to parse_string2
+c      initialize parse_string2 parameters
+       nwds = 0
+       imsg = 0
+       xmsg = 0.
+       cmsg = ''
 c     
 c     return if no noncondensible present
 c     
@@ -511,6 +518,7 @@ c gaz added phase designation for humidity IC (gas,ieos(i) = 3 )
 c     Check to verify if new input is being used for group 3
             read (inpt, '(a80)') dumstring
             backspace inpt
+            nwds=0
             call parse_string2(dumstring,imsg,msg,xmsg,cmsg,nwds)
             if (nwds .gt. 0 .and. nwds .lt. 5) then
                old_input = .true.
@@ -596,6 +604,7 @@ c     Check to verify if new input is being used for group 4
             if (.not. old_input) then
                read (inpt, '(a80)') dumstring
                backspace inpt
+               nwds=0
                call parse_string2(dumstring,imsg,msg,xmsg,cmsg,nwds)
                if (nwds .gt. 0 .and. nwds .lt. 5) then
                   old_input = .true.
@@ -1056,18 +1065,24 @@ c switch variables case 1
          if(ieosd.eq.2) then
 c possible change from 2 phase conditions  
 c since calculating on an individual gridblock we can ignore porosity and volume
-         call mass_component_liq(ij,2)
-         call mass_component_gas(ij,2)
+
+c xhua error#6631 A non-optional actual argument must be present when 
+c                 invoking a procedure with an explicit interface
+c        call mass_component_liq(ij,2)    this is old one
+c        call mass_component_gas(ij,2)    this is old one
+         call mass_component_liq(iflg,ij,2)
+         call mass_component_gas(iflg,ij,2)
+
          sl = s(ij)
          sv =1.0-sl
          z_total = (xnl*rol*sl+xnv*rov*sv)
          z_massfrac = z_total/(rol*sl+rov*sv)
 c check for liquid phase transition
-         call mass_component_liq(ij,1)
+         call mass_component_liq(iflg,ij,1)
 c check for gas phase transition
-         call mass_component_gas(ij,1)
+         call mass_component_gas(iflg,ij,1)
 c check for sc phase transition
-         call mass_component_sc(ij,1)         
+         call mass_component_sc(iflg,ij,1)         
          else if(ieosd.eq.1) then         
 c possible change from liquid conditions          
          else if(ieosd.eq.3) then
@@ -1118,16 +1133,20 @@ c calculate non water liq component in binary mixture
       real*8 z_old, z, zl_ngas, roc_tmp, phi_tmp, dresid_masspc 
 c gaz 072522 added local variables   
       real*8 pci_tmp, psatl, psatl_100, dpsatt_100, dpsats
-      real*8 dum0, dum2, dum3
+
       real*8 resid_mass, tol_mass_phase 
       integer  ij, iphase, istate, ieos_save, intv, intv_cnt
       integer inr0, max_inr0
       integer, allocatable :: node_intv(:)
-      parameter (max_inr0 = 10, tol_mass_phase = 1.d-6, intv = 10)
-c
-      character*80 dum1, dumb, dumc
+
+c tam Error: Type mismatch between actual arguments  (CHARACTER(80)/REAL(8
+c dumb, dumc changed from character*80 to real*8
+      real*8 dum0, dum2, dum3, dumb, dumc
+      character*80 dum1
       logical phase_nr(3), test_phase
-c      parameter (test_phase = .true.)
+      parameter (max_inr0 = 10, tol_mass_phase = 1.d-6, intv = 10)
+c     parameter (test_phase = .true.)
+
 cDEC$ FIXEDFORMLINESIZE:132      
       if(iflg.eq.0) then
 c allocate memory            

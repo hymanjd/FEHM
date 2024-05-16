@@ -340,13 +340,20 @@ c      tl_last = tl
 c      ieosd_last = ieosd
 c gaz 101521 added pure water and heat sat pressure      
       if(ico2.eq.0) then
+
 c water_vapor_calc ids table-lookup or polynomial evaluation            
-       call water_vapor_calc(1, ii, ii, '', '')
+c tam Error string length does not match declared length of character*9
+c fix by passing empty sring with 9 spaces
+
+       call water_vapor_calc(1, ii, ii, '         ', '         ')
+
        xv = pl
        pv =xv
       else
 c water_vapor_calc_ngas ids table-lookup or polynomial evaluation  
-       call water_vapor_calc_ngas(1, ii, ii, '', '')
+
+       call water_vapor_calc_ngas(1, ii, ii, 
+     &                           '         ', '         ')
        xv = xv_h2o(ii)  
        pv =xv
       endif       
@@ -867,13 +874,16 @@ c      tl_last = tl
 c      ieosd_last = ieosd
 c gaz 101521 added pure water and heat sat pressure      
       if(ico2.eq.0) then
+
 c water_vapor_calc ids table-lookup or polynomial evaluation            
-       call water_vapor_calc(1, ii, ii, '', '')
+c tam make empty string with 9 spaces
+       call water_vapor_calc(1, ii, ii, '        ', '         ')
        xv = pl
        pv =xv
       else
+
 c water_vapor_calc_ngas ids table-lookup or polynomial evaluation  
-       call water_vapor_calc_ngas(1, ii, ii, '', '')
+       call water_vapor_calc_ngas(1, ii, ii, '         ', '         ')
        xv = xv_h2o(ii)  
        pv =xv
       endif       
