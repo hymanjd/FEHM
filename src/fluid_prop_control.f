@@ -877,7 +877,7 @@ c gaz 101521 added pure water and heat sat pressure
 
 c water_vapor_calc ids table-lookup or polynomial evaluation            
 c tam make empty string with 9 spaces
-       call water_vapor_calc(1, ii, ii, '        ', '         ')
+       call water_vapor_calc(1, ii, ii,'         ', '         ')
        xv = pl
        pv =xv
       else
