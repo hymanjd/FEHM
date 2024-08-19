@@ -74,7 +74,8 @@ co2_array.o: comai.o combi.o comci.o comdi.o comdti.o comei.o comfi.o comgi.o
 co2_array.o: comhi.o commeth.o davidi.o
 co2_fugacity.o: ${SRCDIR}params_eosco2.h
 co2_properties.o: comai.o comco2.o comdi.o comrxni.o interpolate.o
-co2ctr.o: comai.o combi.o comci.o comdi.o comdti.o comei.o comfi.o comgi.o
+com_exphase.mod: com_exphase.o
+co2ctr.o: comai.o combi.o comci.o comdi.o comdti.o comei.o comfi.o comgi.o com_exphase.o
 co2ctr.o: comhi.o comii.o comki.o comxi.o davidi.o com_prop_data.o commass_AWH.o
 co2h2o_combine.o: comai.o combi.o comci.o comco2.o comdi.o comdti.o comei.o
 co2h2o_combine.o: comfi.o comgi.o comhi.o davidi.o
@@ -697,7 +698,8 @@ wtsictr.o: comai.o combi.o comci.o comdi.o comdti.o comfi.o comii.o comwt.o
 wtsictr.o: comxi.o
 zone.o: avsio.o comai.o combi.o comdi.o comdti.o trxnvars.o
 varchk_simple_awh.o: com_exphase.o com_prop_data.o commass_AWH.o
-air_cp.o: com_prop_data.o comsplitts.o com_prop_data.o
+comwt.mod: comwt.o
+air_cp.o: com_prop_data.o comsplitts.o com_prop_data.o comwt.o
 geneq2_sol.o: com_prop_data.o
 fluid_prop_control.o: com_prop_data.o
 data.o: commass_AWH.o
@@ -711,3 +713,5 @@ commass_AWH.mod: commass_AWH.o
 com_prop_data.mod: com_prop_data.o
 air_properties_new.o: interpolate_2b.o
 co2_properties_new.o: interpolate_2c.o
+Sub_FEHM_tec_to_vtk.o: comai.o avsio.o
+
