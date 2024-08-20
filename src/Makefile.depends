@@ -6,7 +6,10 @@ GetSubsTime.o: comai.o combi.o comdi.o
 GetSubsWaveLength.o: comai.o combi.o comdi.o
 KozenyCoeff.o: comdi.o
 PorosCoeff.o: comdi.o
+Sub_FEHM_tec_to_vtk.o: comai.o avsio.o
 WaterProps.o: comai.o comdi.o
+air_cp.o: com_prop_data.o comsplitts.o com_prop_data.o comwt.o
+air_properties_new.o: interpolate_2b.o
 accum_derivative.o: comai.o combi.o comci.o comdi.o comdti.o comei.o comfi.o
 accum_derivative.o: comgi.o comii.o comrxni.o comsplitts.o davidi.o
 accum_term.o: comai.o comci.o comdi.o comdti.o comii.o davidi.o
@@ -74,6 +77,7 @@ co2_array.o: comai.o combi.o comci.o comdi.o comdti.o comei.o comfi.o comgi.o
 co2_array.o: comhi.o commeth.o davidi.o
 co2_fugacity.o: ${SRCDIR}params_eosco2.h
 co2_properties.o: comai.o comco2.o comdi.o comrxni.o interpolate.o
+co2_properties_new.o: interpolate_2c.o
 com_exphase.mod: com_exphase.o
 co2ctr.o: comai.o combi.o comci.o comdi.o comdti.o comei.o comfi.o comgi.o com_exphase.o
 co2ctr.o: comhi.o comii.o comki.o comxi.o davidi.o com_prop_data.o commass_AWH.o
@@ -120,6 +124,7 @@ csolve.o: comai.o combi.o comchem.o comci.o comcouple.o comdi.o comdti.o
 csolve.o: comflow.o comgi.o comji.o comrxnb.o comrxni.o comuserc.o davidi.o
 ctdpdp.o: comai.o comdi.o comdti.o comgi.o davidi.o
 darcy_derivatives_BLI.o: combi.o comci.o comdi.o comsptr.o
+data.o: commass_AWH.o
 data.o: comai.o combi.o comchem.o comci.o comdi.o comdti.o comei.o comfi.o
 data.o: comflow.o comgi.o comhi.o comii.o comji.o compart.o comrtd.o comrxni.o
 data.o: comsplitts.o comwt.o comzone.o davidi.o
@@ -210,6 +215,7 @@ flow_boundary_conditions.o: comai.o combi.o comci.o comco2.o comdi.o comdti.o
 flow_boundary_conditions.o: comei.o comfi.o comii.o comki.o comxi.o davidi.o
 flow_flux_perm_residual.o: comai.o combi.o comci.o comdi.o comfem.o comsi.o
 flow_humidity_bc.o: comai.o combi.o comdti.o comii.o
+fluid_prop_control.o: com_prop_data.o
 flux_net.o: comai.o combi.o comci.o comdi.o comflow.o comgi.o comji.o davidi.o
 flxn.o: comai.o combi.o comflow.o davidi.o
 flxo.o: comai.o combi.o comci.o comco2.o comdi.o comdti.o comei.o comfi.o
@@ -251,6 +257,7 @@ geneq2_part.o: com_part.o comai.o combi.o comci.o comdi.o comdti.o comei.o
 geneq2_part.o: comfi.o comflow.o comgi.o comji.o davidi.o
 geneq2_rich.o: comai.o combi.o comci.o comdi.o comdti.o comei.o comfi.o
 geneq2_rich.o: comflow.o comgi.o comii.o comji.o comwt.o davidi.o
+geneq2_sol.o: com_prop_data.o
 geneq2_switch.o: comai.o combi.o comci.o comdi.o comdti.o comei.o comfi.o
 geneq2_switch.o: comflow.o comgi.o comji.o davidi.o
 geneq2_uz_wt.o: comai.o combi.o comci.o comdi.o comdti.o comei.o comfi.o
@@ -509,7 +516,7 @@ rlp_cap_table.o: comrlp.o
 rlp_frac.o: comai.o combi.o comci.o comdi.o comdti.o
 rlp_frac2.o: comai.o combi.o comci.o comdi.o comdti.o
 rlperm.o: comai.o combi.o comci.o comdi.o comdti.o comei.o comfi.o comhi.o
-rlperm.o: comki.o
+rlperm.o: comki.o comrlp_param.o
 rlperm_co2.o: comai.o combi.o comci.o comco2.o comdi.o comdti.o comei.o comfi.o
 rlperm_co2.o: comhi.o comki.o
 rlperm_hyd.o: comai.o combi.o comci.o comdi.o comdti.o comei.o comfi.o comhi.o
@@ -523,7 +530,7 @@ scaled_perm.o: comai.o comdi.o comdti.o comki.o
 scanin.o: comai.o combi.o comchem.o comco2.o comcouple.o comdi.o comdti.o
 scanin.o: compart.o comriv.o comrlp.o comrxni.o comsi.o comsk.o comsplitts.o
 scanin.o: comsptr.o comwellphys.o comwt.o comxi.o comzeoli.o davidi.o
-scanin.o: trxnvars.o comii.o commass_AWH.o
+scanin.o: trxnvars.o comii.o commass_AWH.o com_prop_data.o
 set_mptr.o: comai.o combi.o comci.o comdi.o comdti.o comflow.o compart.o
 set_mptr.o: davidi.o
 set_ptrk.o: comai.o combi.o comci.o comdi.o comdti.o comflow.o compart.o
@@ -651,6 +658,7 @@ varchk.o: comai.o combi.o comci.o comco2.o comdi.o comdti.o comei.o comfi.o
 varchk.o: comgi.o comii.o comtable.o davidi.o com_prop_data.o commass_AWH.o
 varchk_part.o: comai.o comci.o comdi.o comdti.o comei.o comfi.o comgi.o comii.o
 varchk_part.o: davidi.o
+varchk_simple_awh.o: com_exphase.o com_prop_data.o commass_AWH.o
 varctr.o: comai.o combi.o comci.o comdi.o comdti.o comei.o comfi.o comgi.o
 varctr.o: comii.o comrxni.o davidi.o
 vboun.o: comai.o combi.o comci.o comdi.o comdti.o comei.o comfi.o comgi.o
@@ -697,21 +705,56 @@ wtsi_column.o: comai.o combi.o comdi.o comdti.o comwt.o comxi.o
 wtsictr.o: comai.o combi.o comci.o comdi.o comdti.o comfi.o comii.o comwt.o
 wtsictr.o: comxi.o
 zone.o: avsio.o comai.o combi.o comdi.o comdti.o trxnvars.o
-varchk_simple_awh.o: com_exphase.o com_prop_data.o commass_AWH.o
-comwt.mod: comwt.o
-air_cp.o: com_prop_data.o comsplitts.o com_prop_data.o comwt.o
-geneq2_sol.o: com_prop_data.o
-fluid_prop_control.o: com_prop_data.o
-data.o: commass_AWH.o
-varchk_simple_awk.o: commass_AWH.o
+avsio.mod: avsio.o
+cmoai.mod: cmoai.o
 combi.mod: combi.o
+comchem.mod: comchem.o
+comci.mod: comci.o
+comco2.mod: comco2.o
+comcomp.mod: comcomp.o
+comcouple.mod: comcouple.o
+cmodi.mod: cmodi.o
+comdti.mod: comdti.o
+comei.mod: comei.o
+comevap.mod: comevap.o
+com_exphase.mod: com_exphase
+comfem.mod: comfem.o
+comfi.mod: comfi.o
+comflow.mod: comflow.o
+comgi.mod: comgi.o
+cmohi.mod: cmohi.o
+cmoii.mod: cmoii.o
+cmoji.mod: cmoji.o
+cmoki.mod: cmoki.o
+commass_AWH.mod: commass_AWH.o
+commeth.mod: commeth.o
+comnire.mod: comnire.o
+com_part.mod: com_part.o
+compart.mod: compart.o
+compfrac.mod: compfrac.o
+com_prop_data.mod: com_prop_data.o
+comriv.mod: comriv.o
+comrlp.mod: comrlp.o
+comrlp_param.mod: comrlp_param.o
+comrtd.mod: comrtd.o
+comrxnb.mod: comrxnb.o
+comrxni.mod: comrxni.o
+comsi.mod: comsi.o
+comsk.mod: comsk.o
+comsplitts.mod: comsplitts.o
+comsptr.mod: comsptr.o
+comsteady.mod: comsteady.o
+comtable.mod: comtable.o
+comuserc.mod: comuserc.o
+comwellphys.mod: comwellphys.o
+comwt.mod: comwt.o
+comxi.mod: comxi.o
+comzeoli.mod: comzeoli.o
+comzone.mod: comzone.o
+davidi.mod: davidi.o
 property_interpolate.mod: interpolate.o
 property_interpolate_1.mod: interpolate_2a.o
 property_interpolate_2.mod: interpolate_2b.o
 property_interpolate_3.mod: interpolate_2c.o
-commass_AWH.mod: commass_AWH.o
-com_prop_data.mod: com_prop_data.o
-air_properties_new.o: interpolate_2b.o
-co2_properties_new.o: interpolate_2c.o
-Sub_FEHM_tec_to_vtk.o: comai.o avsio.o
-
+modpod.mod: modpod.o
+trxnvars.mod: trxnvars.o
