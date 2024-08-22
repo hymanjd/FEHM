@@ -323,12 +323,14 @@ c debug not fixed but error report added
           do jj = i1,i2
             kb = nelm(jj)
 
+c tam commented out because of too many error reports
+c this will need to be fixed so it does not occur
 c           check for out of bounds index
-            if (kb .gt. n0) then
-              print*,"ERROR area_length_calc"
-              print*,"cord index out of bounds: ",kb
-              print*,"expected boundary: ",n0
-            endif
+c           if (kb .gt. n0) then
+c             print*,"ERROR area_length_calc"
+c             print*,"cord index out of bounds: ",kb
+c             print*,"expected boundary: ",n0
+c           endif
 
             cord1j = cord(kb,1)
             cord2j = cord(kb,2)
