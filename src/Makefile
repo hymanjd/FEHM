@@ -160,11 +160,14 @@ dated.o : ${SRCDIR}dated.f
 	${FC} ${FFLAGS} $< -c  -o ${SRCDIR}$@
 
 
-# Special handling of two files
+# Special handling of platform dependent files
 inrestart.o : ${ALTDIR}inrestart.f
 	${FC} ${FFLAGS} $< -c -o ${SRCDIR}$@
 
 insptr.o : ${ALTDIR}insptr.f
+	${FC} ${FFLAGS} $< -c -o ${SRCDIR}$@
+
+mainrip.o : ${ALTDIR}mainrip.f
 	${FC} ${FFLAGS} $< -c -o ${SRCDIR}$@
 
 
